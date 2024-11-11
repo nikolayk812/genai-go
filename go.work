@@ -1,3 +1,6 @@
 go 1.23
 
-use ./01-hello-world
+use (
+	./01-hello-world
+	./02-streaming
+)

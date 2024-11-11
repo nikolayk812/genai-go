@@ -5,6 +5,7 @@ This project demonstrates how to use Testcontainers for Golang to create a seaml
 ## Project Structure
 
 1. [`01-hello-world`](./01-hello-world): Contains a simple example of using a language model to generate text.
+2. [`02-streaming`](./02-streaming): Contains an example of using a language model to generate text in streaming mode.
 
 ## Prerequisites
 
