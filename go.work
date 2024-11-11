@@ -4,4 +4,5 @@ use (
 	./01-hello-world
 	./02-streaming
 	./03-chat
+	./04-vision-model
 )
