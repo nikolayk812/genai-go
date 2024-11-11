@@ -39,13 +39,9 @@ The application will start a containerized Ollama language model and generate te
 
 ```shell
 Original completion:
-<|start_header_id|>assistant<|end_header_id|>
-
-I'm not aware of any specific information about a conference you're referring to. Could you please provide more context or details about the conference, such as its name or location? I'll do my best to help you find the answer.
+I'm not aware of any specific information about a conference you are referring to. Could you please provide more context or details about the conference? That way, I can try to help you find the answer to your question.
 
 Augmented completion:
-<|start_header_id|>assistant<|end_header_id|>
-
 * The Conference is about how to leverage Testcontainers for building Generative AI applications.
 * The meeting will explore how Testcontainers can be used to create a seamless development environment for AI projects.
 ```
