@@ -6,4 +6,5 @@ use (
 	./03-chat
 	./04-vision-model
 	./05-augmented-generation
+	./06-embeddings
 )

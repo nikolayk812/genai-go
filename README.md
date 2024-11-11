@@ -8,7 +8,8 @@ This project demonstrates how to use Testcontainers for Golang to create a seaml
 2. [`02-streaming`](./02-streaming): Contains an example of using a language model to generate text in streaming mode.
 3. [`03-chat`](./03-chat): Contains an example of using a language model to generate text in a chat application.
 4. [`04-vision-model`](./04-vision-model): Contains an example of using a vision model to generate text from images.
-4. [`05-augmented-generation`](./05-augmented-generation): Contains an example of augmenting the prompt with additional information to generate more accurate text.
+5. [`05-augmented-generation`](./05-augmented-generation): Contains an example of augmenting the prompt with additional information to generate more accurate text.
+6. [`06-embeddings`](./06-embeddings): Contains an example of generating embeddings from text and calculating similarity between them.
 
 ## Prerequisites
 
