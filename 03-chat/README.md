@@ -32,7 +32,8 @@ To run the example, navigate to the `03-chat` directory and run the following co
 go run .
 ```
 
-The application will start a containerized Ollama language model and generate text based on the provided prompt. The generated text will be displayed in the console.
+The application will start a containerized Ollama language model and generate text based on the interactive prompt.
+The generated text will be displayed in the console, and the user can continue interacting with the model until they choose to exit.
 
 ```shell
 go run .
