@@ -5,4 +5,5 @@ use (
 	./02-streaming
 	./03-chat
 	./04-vision-model
+	./05-augmented-generation
 )
