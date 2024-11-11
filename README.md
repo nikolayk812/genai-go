@@ -18,8 +18,8 @@ This project demonstrates how to use Testcontainers for Golang to create a seaml
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/mdelapenya/generative-ai-testcontainers.git
-    cd generative-ai-testcontainers
+    git clone https://github.com/mdelapenya/generative-ai-with-testcontainers.git
+    cd generative-ai-with-testcontainers
     ```
 
 ## Running the Examples
