@@ -55,7 +55,7 @@ func run() (err error) {
 
 	ctx := context.Background()
 	originalContent := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeTool, originalMessage),
+		llms.TextParts(llms.ChatMessageTypeSystem, originalMessage),
 	}
 
 	originalCompletion, err := llm.GenerateContent(
@@ -73,7 +73,7 @@ func run() (err error) {
 	}
 
 	augmentedContent := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeTool, augmentedMessage),
+		llms.TextParts(llms.ChatMessageTypeSystem, augmentedMessage),
 	}
 
 	augmentedCompletion, err := llm.GenerateContent(
