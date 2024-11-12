@@ -21,7 +21,7 @@ func NewStore(ctx context.Context, embedder embeddings.Embedder) (weaviate.Store
 }
 
 func mustGetAddress(ctx context.Context) (string, string) {
-	c, err := tcweaviate.Run(ctx, "semitechnologies/weaviate:1.23.9", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+	c, err := tcweaviate.Run(ctx, "semitechnologies/weaviate:1.27.2", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name: "weaviate-db",
 		},

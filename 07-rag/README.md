@@ -23,7 +23,7 @@ The code in `main.go` sets up and runs two containerized Ollama language models 
   1. Runs an Ollama container using Testcontainers for Golang. The image used is `ilopezluna/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
   2. Retrieves the connection string for the running container.
   3. Creates a new Ollama language model instance, which is used as the embedder for the RAG model.
-  4. Runs a Weaviate container using Testcontainers for Golang. The image used is `semitechnologies/weaviate:1.23.9`, and it is used to store and retrieve embeddings for the RAG.
+  4. Runs a Weaviate container using Testcontainers for Golang. The image used is `semitechnologies/weaviate:1.27.2`, and it is used to store and retrieve embeddings for the RAG.
   5. Ingests some example data into the Weaviate vector store.
   6. Performs a search in Weaviate to retrieve the most similar embeddings to a query.
   7. If there are no results, the program exits with an error message.
