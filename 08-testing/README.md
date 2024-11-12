@@ -44,18 +44,17 @@ go run .
 The application will start two containerized Ollama language models and generate text based on the augmented prompt using RAG. The generated text will be displayed in the console.
 
 ```shell
-What is your favourite sport?
+2024/11/12 18:16:20 How I can enable verbose logging in Testcontainers Desktop?
+>> Straight answer:
+To enable verbose logging in Testcontainers Desktop, you can set the `TESTCONTAINERS_LOG_LEVEL` environment variable to "DEBUG" before running the application. This will increase the log level and provide more detailed output.
 
-Answer the question considering the following relevant content:
-I like football
+Alternatively, you can also use the `-Dtestcontainers.log.level=DEBUG` JVM option when starting the Docker container.
 
-Based on the information provided, I can infer that you enjoy playing or watching football. However, since you didn't specify a particular aspect of football (e.g., team, competition level), I'll provide some general responses.
-
-If you're interested in discussing football, here are a few questions to get started:
-
-* What position do you play or prefer?
-* Do you have a favorite team or player?
-* Are you more into the competitive aspect (e.g., Premier League) or the recreational side of the sport?
-
-Feel free to share your thoughts, and I'll be happy to engage in a conversation about football!% 
+Note that Testcontainers Desktop provides a built-in logging mechanism, so you may need to adjust other logging settings or configurations to achieve the desired verbosity.
+2024/11/12 18:17:35 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
+2024/11/12 18:17:35 Ingesting document: knowledge/txt/tc-guide-introducing-testcontainers.txt
+2024/11/12 18:17:35 Ingesting document: knowledge/txt/tcc.txt
+2024/11/12 18:17:37 Ingested 3 documents
+2024/11/12 18:17:37 run: build ragged chat: similarity search: empty response
+exit status 1
 ```
