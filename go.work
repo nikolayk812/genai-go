@@ -8,4 +8,5 @@ use (
 	./05-augmented-generation
 	./06-embeddings
 	./07-rag
+	./08-testing
 )
