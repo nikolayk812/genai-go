@@ -14,7 +14,7 @@ Contains a simple example of using a language model to answer questions based on
 
 ## Code Explanation
 
-The code in `main.go` sets up and runs two containerized Ollama language models and a Weaviate vector store using Testcontainers, then uses uno of the models to generate the embeddings for a set of texts. It then uses the Weaviate vector store to search for similar embeddings and generate text based on the augmented prompt using RAG.
+The code in `main.go` sets up and runs two containerized Ollama language models and a Weaviate vector store using Testcontainers, then uses one of the models to generate the embeddings for a set of texts. It then uses the Weaviate vector store to search for similar embeddings and generate text based on the augmented prompt using RAG.
 
 ### Main Functions
 
