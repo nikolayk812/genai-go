@@ -22,7 +22,7 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "ilopezluna/moondream:0.3.13-1.8b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/moondream:0.3.13-1.8b")
 	if err != nil {
 		return err
 	}

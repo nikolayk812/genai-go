@@ -17,7 +17,7 @@ The code in `main.go` sets up and runs a containerized Ollama language model usi
 
 - `main()`: The entry point of the application. It calls the `run()` function and logs any errors.
 - `run()`: The main logic of the application. It performs the following steps:
-  1. Runs an Ollama container using Testcontainers for Golang. The image used is `ilopezluna/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
+  1. Runs an Ollama container using Testcontainers for Golang. The image used is `mdelapenya/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
   2. Retrieves the connection string for the running container.
   3. Creates a new Ollama language model instance.
   4. Defines a set of texts for which we want to calculate the embeddings.

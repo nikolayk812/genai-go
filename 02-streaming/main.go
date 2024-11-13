@@ -18,7 +18,7 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "ilopezluna/qwen2:0.3.13-0.5b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/qwen2:0.3.13-0.5b")
 	if err != nil {
 		return err
 	}

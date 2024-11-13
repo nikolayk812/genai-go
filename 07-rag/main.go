@@ -95,7 +95,7 @@ Answer the question considering the following relevant content:
 }
 
 func buildChatModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "ilopezluna/llama3.2:0.3.13-1b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func buildChatModel() (*ollama.LLM, error) {
 }
 
 func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "ilopezluna/all-minilm:0.3.13-22m")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m")
 	if err != nil {
 		return nil, err
 	}
