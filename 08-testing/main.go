@@ -89,7 +89,7 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 
 	// Enrich the response with the relevant documents after the ingestion
 	optionsVector := []vectorstores.Option{
-		vectorstores.WithScoreThreshold(0.80), // use for precision, when you want to get only the most relevant documents
+		vectorstores.WithScoreThreshold(0.60), // use for precision, when you want to get only the most relevant documents
 		//vectorstores.WithNameSpace("default"),            // use for set a namespace in the storage
 		//vectorstores.WithFilters(map[string]interface{}{"language": "en"}), // use for filter the documents
 		vectorstores.WithEmbedder(embedder), // use when you want add documents or doing similarity search
