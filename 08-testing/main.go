@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/mdelapenya/genai-testcontainers-go/testing/ai"
-	"github.com/mdelapenya/genai-testcontainers-go/testing/weaviate"
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
@@ -79,9 +78,9 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 		return nil, fmt.Errorf("new embedder: %w", err)
 	}
 
-	store, err := weaviate.NewStore(context.Background(), embedder)
+	store, err := selectStore(context.Background(), embedder)
 	if err != nil {
-		return nil, fmt.Errorf("weaviate new store: %w", err)
+		return nil, fmt.Errorf("new store: %w", err)
 	}
 
 	if err := ingestion(store); err != nil {
