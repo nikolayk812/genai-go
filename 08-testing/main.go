@@ -102,7 +102,7 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 	if err != nil {
 		return nil, fmt.Errorf("similarity search: %w", err)
 	}
-	log.Printf("Relevant documents for RAG: %v\n", relevantDocs)
+	log.Printf("Relevant documents for RAG: %d\n", len(relevantDocs))
 
 	return ai.New(chatModel, ai.WithRAGContext(relevantDocs)), nil
 }
