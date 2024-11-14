@@ -28,17 +28,17 @@ The vector store to use is `weaviate` by default, but it can be changed to `pgve
 - `main()`: The entry point of the application. It calls the `run()` function and logs any errors.
 - `run()`: The main logic of the application. It performs the following steps:
   1. Runs an Ollama container using Testcontainers for Golang. The image used is `mdelapenya/llama3.2:0.3.13-1b`, loading the `llama3.2:1b` model.
-  2. Retrieves the connection string for the running container.
-  3. Creates a new Ollama language model instance, which is used as the chat model.
-  4. The chat model is asked directly for a response to a fixed question. The model does not have any context about the question.
-  1. Runs an Ollama container using Testcontainers for Golang. The image used is `mdelapenya/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
-  3. From this Ollama container, it creates a new Ollama language model instance, which is used as the embedder for the RAG model.
-  4. Runs a store container using Testcontainers for Golang, and it is used to store and retrieve embeddings for the RAG.
-  5. Ingests some markdown documents about Testcontainers Cloud into the vector store, using the embedder.
-  6. Performs a search in the store to retrieve the most similar embeddings to the original fixed question.
-  7. If there are no results, the program exits with an error message.
-  8. If there are results, the program builds a chat language model using Ollama (image `mdelapenya/llama3.2:0.3.13-1b` and model `llama3.2:1b`).
-  9. Using the relevant content from the store search results, the program generates a streaming response to the user's prompt.
+  1. Retrieves the connection string for the running container.
+  1. Creates a new Ollama language model instance, which is used as the chat model.
+  1. The chat model is asked directly for a response to a fixed question. The model does not have any context about the question.
+  1. Runs an Ollama container using Testcontainers for Golang. The image used is `mdelapenya/bge-m3:0.3.13-567m`, loading the `bge-m3:567m` model, which is useful for large text generation.
+  1. From this Ollama container, it creates a new Ollama language model instance, which is used as the embedder for the RAG model.
+  1. Runs a store container using Testcontainers for Golang, and it is used to store and retrieve embeddings for the RAG.
+  1. Ingests some markdown documents about Testcontainers Cloud into the vector store, using the embedder.
+  1. Performs a search in the store to retrieve the most similar embeddings to the original fixed question.
+  1. If there are no results, the program exits with an error message.
+  1. If there are results, the program builds a chat language model using Ollama (image `mdelapenya/llama3.2:0.3.13-1b` and model `llama3.2:1b`).
+  1. Using the relevant content from the store search results, the program generates a streaming response to the user's prompt.
 
 ## Running the Example
 
@@ -51,17 +51,63 @@ go run .
 The application will start two containerized Ollama language models and generate text based on the augmented prompt using RAG. The generated text will be displayed in the console.
 
 ```shell
-2024/11/12 18:16:20 How I can enable verbose logging in Testcontainers Desktop?
+2024/11/14 01:40:28 How I can enable verbose logging in Testcontainers Desktop?
 >> Straight answer:
 To enable verbose logging in Testcontainers Desktop, you can set the `TESTCONTAINERS_LOG_LEVEL` environment variable to "DEBUG" before running the application. This will increase the log level and provide more detailed output.
 
-Alternatively, you can also use the `-Dtestcontainers.log.level=DEBUG` JVM option when starting the Docker container.
+Alternatively, you can also specify a logging configuration file that includes the desired log level. For example, you can create a file named `logging.conf` with the following content:
 
-Note that Testcontainers Desktop provides a built-in logging mechanism, so you may need to adjust other logging settings or configurations to achieve the desired verbosity.
-2024/11/12 18:17:35 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
-2024/11/12 18:17:35 Ingesting document: knowledge/txt/tc-guide-introducing-testcontainers.txt
-2024/11/12 18:17:35 Ingesting document: knowledge/txt/tcc.txt
-2024/11/12 18:17:37 Ingested 3 documents
-2024/11/12 18:17:37 run: build ragged chat: similarity search: empty response
-exit status 1
+[loggers]
+keys=root
+
+[handlers]
+keys=console
+
+[formatters]
+keys=simple
+
+[logger_root]
+level=DEBUG
+qname=
+level=DEBUG
+type=console
+args=-v
+
+[handler_console]
+class=StreamHandler
+args=-v
+level=
+formatter=simple
+args=
+
+[formatter_simple]
+format=%(asctime)s - %(name)-15j - %(levelname)-8s - %(message)s
+
+Then, you can run Testcontainers Desktop with the `--config` option to specify the logging configuration file.
+2024/11/14 01:40:42 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
+2024/11/14 01:40:42 Ingesting document: knowledge/txt/tc-guide-introducing-testcontainers.txt
+2024/11/14 01:40:42 Ingesting document: knowledge/txt/tcc.txt
+2024/11/14 01:40:45 Ingested 3 documents
+2024/11/14 01:40:45 Relevant documents for RAG: 3
+>> Ragged answer:
+To enable verbose logging in Testcontainers Desktop, you can follow these steps:
+
+1. Open the Testcontainers Desktop application.
+2. Click on the three dots (`...`) next to the "Testcontainers" label in the top-right corner of the window.
+3. Select "Preferences" from the context menu.
+4. In the Preferences dialog box, click on the "Logging" tab.
+5. Under the "Logging level" dropdown menu, select "DEBUG".
+6. You can also adjust other logging levels such as "INFO", "WARNING", and "ERROR" to suit your needs.
+
+Alternatively, you can also enable verbose logging by adding the following property to your `testcontainers.properties` file (usually located in the same directory as your test class):
+
+testcontainers.log.level=DEBUG
+
+This will set the logging level to DEBUG for all Testcontainers components. You can adjust this value to suit your needs.
+
+Additionally, you can also enable verbose logging by adding the following JVM option when running your tests:
+
+-Dtestcontainers.log.level=DEBUG
+
+Note that the logging level is not limited to just "DEBUG". You can use other values such as "INFO", "WARNING", and "ERROR" to control the verbosity of the logs.% 
 ```

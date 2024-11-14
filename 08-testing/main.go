@@ -98,7 +98,7 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 
 	maxResults := 3 // Number of relevant documents to return
 
-	relevantDocs, err := store.SimilaritySearch(context.Background(), "cloud.logs.verbose", maxResults, optionsVector...)
+	relevantDocs, err := store.SimilaritySearch(context.Background(), "verbose", maxResults, optionsVector...)
 	if err != nil {
 		return nil, fmt.Errorf("similarity search: %w", err)
 	}
