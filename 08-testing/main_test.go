@@ -16,15 +16,21 @@ func Test1_oldSchool(t *testing.T) {
 		t.Fatalf("build chat model: %s", err)
 	}
 
+	containsFn := func(t *testing.T, answer string) {
+		t.Helper()
+
+		if !strings.Contains(answer, "cloud.logs.verbose") {
+			t.Fatalf("contains: %s", answer)
+		}
+	}
+
 	t.Run("straight-answer", func(t *testing.T) {
 		answer, err := straightAnswer(chatModel)
 		if err != nil {
 			t.Fatalf("straight chat: %s", err)
 		}
 
-		if !strings.Contains(answer, "cloud.logs.verbose = true") {
-			t.Fatalf("straight chat: %s", answer)
-		}
+		containsFn(t, answer)
 	})
 
 	t.Run("ragged-answer", func(t *testing.T) {
@@ -33,9 +39,7 @@ func Test1_oldSchool(t *testing.T) {
 			t.Fatalf("straight chat: %s", err)
 		}
 
-		if !strings.Contains(answer, "cloud.logs.verbose = true") {
-			t.Fatalf("ragged chat: %s", answer)
-		}
+		containsFn(t, answer)
 	})
 }
 
@@ -62,38 +66,58 @@ func Test2_embeddings(t *testing.T) {
 		t.Fatal("embed query", err)
 	}
 
-	t.Run("straight-answer", func(t *testing.T) {
+	similarityFn := func(t *testing.T, answer string) {
+		t.Helper()
+
+		answerVector, err := embedder.EmbedDocuments(context.Background(), []string{answer})
+		if err != nil {
+			t.Fatal("embed answer", err)
+		}
+
+		sim := cosineSimilarity(t, reference[0], answerVector[0])
+		if sim <= 0.80 {
+			t.Fatalf("similarity: %s", answer)
+		}
+	}
+
+	t.Run("straight-answer/pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
+
 		answer, err := straightAnswer(chatModel)
 		if err != nil {
-			t.Fatalf("straight chat: %s", err)
+			t.Fatalf("straight answer: %s", err)
 		}
 
-		answerVector, err := embedder.EmbedDocuments(context.Background(), []string{answer})
-		if err != nil {
-			t.Fatal("embed answer", err)
-		}
-
-		sim := cosineSimilarity(t, reference[0], answerVector[0])
-		if sim <= 0.80 {
-			t.Fatalf("straight chat: %s", answer)
-		}
+		similarityFn(t, answer)
 	})
 
-	t.Run("ragged-answer", func(t *testing.T) {
+	t.Run("ragged-answer/pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
+
 		answer, err := raggedAnswer(chatModel)
 		if err != nil {
-			t.Fatalf("ragged chat: %s", err)
+			t.Fatalf("ragged answer: %s", err)
 		}
 
-		answerVector, err := embedder.EmbedDocuments(context.Background(), []string{answer})
+		similarityFn(t, answer)
+	})
+
+	t.Run("straight-answer/weaviate", func(t *testing.T) {
+		answer, err := straightAnswer(chatModel)
 		if err != nil {
-			t.Fatal("embed answer", err)
+			t.Fatalf("straight answer: %s", err)
 		}
 
-		sim := cosineSimilarity(t, reference[0], answerVector[0])
-		if sim <= 0.80 {
-			t.Fatalf("ragged chat: %s", answer)
+		similarityFn(t, answer)
+	})
+
+	t.Run("ragged-answer/weaviate", func(t *testing.T) {
+		answer, err := raggedAnswer(chatModel)
+		if err != nil {
+			t.Fatalf("ragged answer: %s", err)
 		}
+
+		similarityFn(t, answer)
 	})
 }
 
@@ -130,35 +154,56 @@ func Test3_validatorAgent(t *testing.T) {
 
 	validatorAgent := ai.NewValidatorAgent(chatModel)
 
-	t.Run("straight-answer", func(t *testing.T) {
+	validateFn := func(t *testing.T, answer string) {
+		t.Helper()
+
+		resp, err := validatorAgent.Validate(question, answer, reference)
+		if err != nil {
+			t.Fatalf("validate: %s", err)
+		}
+
+		if resp != "yes" {
+			t.Fatalf("chat: %s", validatorAgent.Response())
+		}
+	}
+
+	t.Run("straight-answer/pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
+
 		answer, err := straightAnswer(chatModel)
 		if err != nil {
-			t.Fatalf("straight chat: %s", err)
+			t.Fatalf("straight answer: %s", err)
 		}
 
-		resp, err := validatorAgent.Validate(question, answer, reference)
-		if err != nil {
-			t.Fatalf("straight chat: %s", err)
-		}
-
-		if resp != "yes" {
-			t.Fatalf("straight chat: %s", validatorAgent.Response())
-		}
+		validateFn(t, answer)
 	})
 
-	t.Run("ragged-answer", func(t *testing.T) {
+	t.Run("ragged-answer/pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
+
 		answer, err := raggedAnswer(chatModel)
 		if err != nil {
-			t.Fatalf("ragged chat: %s", err)
+			t.Fatalf("ragged answer: %s", err)
 		}
 
-		resp, err := validatorAgent.Validate(question, answer, reference)
+		validateFn(t, answer)
+	})
+
+	t.Run("straight-answer/weaviate", func(t *testing.T) {
+		answer, err := straightAnswer(chatModel)
 		if err != nil {
-			t.Fatalf("ragged chat: %s", err)
+			t.Fatalf("straight answer: %s", err)
 		}
 
-		if resp != "yes" {
-			t.Fatalf("ragged chat: %s", validatorAgent.Response())
+		validateFn(t, answer)
+	})
+
+	t.Run("ragged-answer/weaviate", func(t *testing.T) {
+		answer, err := raggedAnswer(chatModel)
+		if err != nil {
+			t.Fatalf("ragged answer: %s", err)
 		}
+
+		validateFn(t, answer)
 	})
 }
