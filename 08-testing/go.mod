@@ -3,6 +3,7 @@ module github.com/mdelapenya/genai-testcontainers-go/testing
 go 1.23
 
 require (
+	github.com/chewxy/math32 v1.11.1
 	github.com/testcontainers/testcontainers-go v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/ollama v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0
