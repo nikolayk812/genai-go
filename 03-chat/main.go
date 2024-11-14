@@ -23,7 +23,12 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Name: "chat-model",
+		},
+		Reuse: true,
+	}))
 	if err != nil {
 		return err
 	}

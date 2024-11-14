@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/testcontainers/testcontainers-go"
 	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
@@ -95,7 +96,12 @@ Answer the question considering the following relevant content:
 }
 
 func buildChatModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Name: "chat-model",
+		},
+		Reuse: true,
+	}))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +120,12 @@ func buildChatModel() (*ollama.LLM, error) {
 }
 
 func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Name: "embeddings-model",
+		},
+		Reuse: true,
+	}))
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,12 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/moondream:0.3.13-1.8b")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/moondream:0.3.13-1.8b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
+			Name: "vision-model",
+		},
+		Reuse: true,
+	}))
 	if err != nil {
 		return err
 	}
