@@ -53,12 +53,13 @@ go run .
 The application will start two containerized Ollama language models and generate text based on the augmented prompt using RAG. The generated text will be displayed in the console.
 
 ```shell
-2024/11/14 01:40:28 How I can enable verbose logging in Testcontainers Desktop?
+2024/11/14 12:54:19 How I can enable verbose logging in Testcontainers Desktop?
 >> Straight answer:
-To enable verbose logging in Testcontainers Desktop, you can set the `TESTCONTAINERS_LOG_LEVEL` environment variable to "DEBUG" before running the application. This will increase the log level and provide more detailed output.
+ To enable verbose logging in Testcontainers Desktop, you can set the `TESTCONTAINERS_LOG_LEVEL` environment variable to "DEBUG" before running the application. This will increase the log level and provide more detailed output.
 
 Alternatively, you can also specify a logging configuration file that includes the desired log level. For example, you can create a file named `logging.conf` with the following content:
 
+```
 [loggers]
 keys=root
 
@@ -84,34 +85,16 @@ args=
 
 [formatter_simple]
 format=%(asctime)s - %(name)-15j - %(levelname)-8s - %(message)s
+```
 
 Then, you can run Testcontainers Desktop with the `--config` option to specify the logging configuration file.
-2024/11/14 01:40:42 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
-2024/11/14 01:40:42 Ingesting document: knowledge/txt/tc-guide-introducing-testcontainers.txt
-2024/11/14 01:40:42 Ingesting document: knowledge/txt/tcc.txt
-2024/11/14 01:40:45 Ingested 3 documents
-2024/11/14 01:40:45 Relevant documents for RAG: 3
+2024/11/14 12:54:34 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
+2024/11/14 12:54:34 Ingesting document: knowledge/txt/tc-guide-introducing-testcontainers.txt
+2024/11/14 12:54:34 Ingesting document: knowledge/txt/tcc.txt
+2024/11/14 12:54:44 Ingested 82 documents
+2024/11/14 12:54:44 Relevant documents for RAG: 3
 >> Ragged answer:
-To enable verbose logging in Testcontainers Desktop, you can follow these steps:
-
-1. Open the Testcontainers Desktop application.
-2. Click on the three dots (`...`) next to the "Testcontainers" label in the top-right corner of the window.
-3. Select "Preferences" from the context menu.
-4. In the Preferences dialog box, click on the "Logging" tab.
-5. Under the "Logging level" dropdown menu, select "DEBUG".
-6. You can also adjust other logging levels such as "INFO", "WARNING", and "ERROR" to suit your needs.
-
-Alternatively, you can also enable verbose logging by adding the following property to your `testcontainers.properties` file (usually located in the same directory as your test class):
-
-testcontainers.log.level=DEBUG
-
-This will set the logging level to DEBUG for all Testcontainers components. You can adjust this value to suit your needs.
-
-Additionally, you can also enable verbose logging by adding the following JVM option when running your tests:
-
--Dtestcontainers.log.level=DEBUG
-
-Note that the logging level is not limited to just "DEBUG". You can use other values such as "INFO", "WARNING", and "ERROR" to control the verbosity of the logs.% 
+ To enable verbose logging in Testcontainers Desktop, you can add a property to your per-user configuration file (~/.testcontainers.properties) with the key "cloud.logs.verbose" and set its value to true. Alternatively, you can use the --verbose flag when running the client or set the environmental variable TC_CLOUD_LOGS_VERBOSE=true.
 ```
 
 ## How to test this (1): String comparison
