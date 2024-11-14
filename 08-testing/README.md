@@ -112,10 +112,26 @@ Additionally, you can also enable verbose logging by adding the following JVM op
 Note that the logging level is not limited to just "DEBUG". You can use other values such as "INFO", "WARNING", and "ERROR" to control the verbosity of the logs.% 
 ```
 
-## How to test this (1)
+## How to test this (1): String comparison
 
-To test this, what we would usually do is to create a test file with two tests, one for the straight answer and another for the ragged answer. We would then run the tests and check if the output matches the expected output. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test1` test function.
+To test this, what we would usually do is to create a test file with two tests, one for the straight answer and another for the ragged answer. We would then run the tests and check if the output matches the expected output. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test1_oldSchool` test function, and then run the tests:
 
 ```shell
-go test -timeout 600s -run ^Test1$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
+go test -timeout 600s -run ^Test1_oldSchool$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
+```
+
+## How to test this (2): Embeddings
+
+In a second iteration, we remembered that we now know how to create emebeddings and calculate the cosine similarity. So we create two tests more in the test file, one for the straight answer and another for the ragged answer. We would then run the tests and check if the cosine similarity is higher thatn 0.8 (our threshold). Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test2_embeddings` test function, and then run the tests:
+
+```shell
+go test -timeout 600s -run ^Test2_embeddings$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
+```
+
+## How to test this (3): Validator Agents
+
+Finally, in a third iteration, we realised that we have a lot of power with LLMs, and it would be cool to use one to validate the answers. We could be as strict as needed defining the System and User prompts, in order for the validator agent to be very specific about the answer. We can even provide an output format for the answer, so the validator agent can check if the answer is correct. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test3_validatorAgent` test function, and then run the tests:
+
+```shell
+go test -timeout 600s -run ^Test3_validatorAgent$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
 ```
