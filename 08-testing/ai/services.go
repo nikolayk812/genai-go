@@ -100,11 +100,6 @@ type ValidatorAgent struct {
 	systemMessage string
 	chatModel     llms.Model
 	userMessage   string
-	response      string
-}
-
-func (v *ValidatorAgent) Response() string {
-	return v.response
 }
 
 func (v *ValidatorAgent) Validate(question string, answer string, reference string) (string, error) {
@@ -128,8 +123,6 @@ func (v *ValidatorAgent) Validate(question string, answer string, reference stri
 	for _, choice := range completion.Choices {
 		response += choice.Content
 	}
-
-	v.response = response
 
 	return response, nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -76,7 +77,7 @@ func Test2_embeddings(t *testing.T) {
 
 		sim := cosineSimilarity(t, reference[0], answerVector[0])
 		if sim <= 0.80 {
-			t.Fatalf("similarity: %s", answer)
+			t.Fatalf("similarity is %f: %s", sim, answer)
 		}
 	}
 
@@ -162,8 +163,19 @@ func Test3_validatorAgent(t *testing.T) {
 			t.Fatalf("validate: %s", err)
 		}
 
-		if resp != "yes" {
-			t.Fatalf("chat: %s", validatorAgent.Response())
+		type r struct {
+			Response string `json:"response"`
+			Reason   string `json:"reason"`
+		}
+
+		var jsonResp r
+		err = json.Unmarshal([]byte(resp), &jsonResp)
+		if err != nil {
+			t.Fatalf("json unmarshal: %s", err)
+		}
+
+		if jsonResp.Response != "yes" {
+			t.Fatalf("chat: %s", jsonResp.Reason)
 		}
 	}
 
