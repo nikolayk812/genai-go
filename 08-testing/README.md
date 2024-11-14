@@ -33,10 +33,10 @@ We are adding tests to demonstrate how to validate the answers of the language m
   1. Retrieves the connection string for the running container.
   1. Creates a new Ollama language model instance, which is used as the chat model.
   1. The chat model is asked directly for a response to a fixed question. The model does not have any context about the question.
-  1. Runs an Ollama container using Testcontainers. The image used is `mdelapenya/bge-m3:0.3.13-567m`, loading the `bge-m3:567m` model, which is useful for large text generation.
+  1. Runs an Ollama container using Testcontainers. The image used is `mdelapenya/all-minilm:0.3.13-2m`, loading the `all-minilm:22m` model, which is useful for large text generation.
   1. From this Ollama container, it creates a new Ollama language model instance, which is used as the embedder for the RAG model.
   1. Runs a store container using Testcontainers, and it is used to store and retrieve embeddings for the RAG.
-  1. Ingests some markdown documents about Testcontainers Cloud into the vector store, using the embedder.
+  1. Ingests some markdown documents about Testcontainers Cloud into the vector store, using the embedder. The files are ingested using chunks of 1024 characters.
   1. Performs a search in the store to retrieve the most similar embeddings to the original fixed question.
   1. If there are no results, the program exits with an error message.
   1. If there are results, the program builds a chat language model using Ollama (image `mdelapenya/llama3.2:0.3.13-1b` and model `llama3.2:1b`).
