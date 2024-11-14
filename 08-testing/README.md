@@ -1,6 +1,6 @@
 # 08-testing
 
-Contains a simple example of using a language model to answer questions based on a given prompt using RAG (Retrieval-Augmented Generation).
+Contains a simple example of using a language model to validate the answers of other language models, using a Validator Agent.
 
 ## Libraries Involved
 
