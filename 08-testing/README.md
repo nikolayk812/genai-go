@@ -111,3 +111,11 @@ Additionally, you can also enable verbose logging by adding the following JVM op
 
 Note that the logging level is not limited to just "DEBUG". You can use other values such as "INFO", "WARNING", and "ERROR" to control the verbosity of the logs.% 
 ```
+
+## How to test this (1)
+
+To test this, what we would usually do is to create a test file with two tests, one for the straight answer and another for the ragged answer. We would then run the tests and check if the output matches the expected output. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test1` test function.
+
+```shell
+go test -timeout 600s -run ^Test1$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
+```
