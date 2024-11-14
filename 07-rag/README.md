@@ -4,7 +4,7 @@ Contains a simple example of using a language model to answer questions based on
 
 ## Libraries Involved
 
-- `github.com/testcontainers/testcontainers-go`: A library for running Docker containers for integration tests.
+- `github.com/testcontainers/testcontainers-go`: [Testcontainers for Golang](https://github.com/testcontainers/testcontainers-go) is library for running Docker containers for integration tests.
 - `github.com/testcontainers/testcontainers-go/modules/ollama`: A module for running Ollama language models using Testcontainers.
 - `github.com/testcontainers/testcontainers-go/modules/weaviate`: A module for running Weaviate vector search engines using Testcontainers.
 - `github.com/tmc/langchaingo`: A library for interacting with language models.
@@ -20,10 +20,10 @@ The code in `main.go` sets up and runs two containerized Ollama language models 
 
 - `main()`: The entry point of the application. It calls the `run()` function and logs any errors.
 - `run()`: The main logic of the application. It performs the following steps:
-  1. Runs an Ollama container using Testcontainers for Golang. The image used is `mdelapenya/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
+  1. Runs an Ollama container using Testcontainers. The image used is `mdelapenya/all-minilm:0.3.13-22m`, loading the `all-minilm:22m` model.
   2. Retrieves the connection string for the running container.
   3. Creates a new Ollama language model instance, which is used as the embedder for the RAG model.
-  4. Runs a Weaviate container using Testcontainers for Golang. The image used is `semitechnologies/weaviate:1.27.2`, and it is used to store and retrieve embeddings for the RAG.
+  4. Runs a Weaviate container using Testcontainers. The image used is `semitechnologies/weaviate:1.27.2`, and it is used to store and retrieve embeddings for the RAG.
   5. Ingests some example data into the Weaviate vector store.
   6. Performs a search in Weaviate to retrieve the most similar embeddings to a query.
   7. If there are no results, the program exits with an error message.

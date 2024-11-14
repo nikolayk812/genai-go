@@ -1,6 +1,6 @@
 # Generative AI with Testcontainers for Golang
 
-This project demonstrates how to use Testcontainers for Golang to create a seamless development environment for building Generative AI applications.
+This project demonstrates how to use [Testcontainers for Golang](https://github.com/testcontainers/testcontainers-go) to create a seamless development environment for building Generative AI applications.
 
 ## Project Structure
 
