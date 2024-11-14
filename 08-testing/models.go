@@ -28,7 +28,7 @@ func buildChatModel() (*ollama.LLM, error) {
 }
 
 func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/bge-m3:0.3.13-567m")
+	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m")
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func buildEmbeddingModel() (*ollama.LLM, error) {
 		return nil, fmt.Errorf("connection string: %w", err)
 	}
 
-	llm, err := ollama.New(ollama.WithModel("bge-m3:567m"), ollama.WithServerURL(ollamaURL))
+	llm, err := ollama.New(ollama.WithModel("all-minilm:22m"), ollama.WithServerURL(ollamaURL))
 	if err != nil {
 		return nil, fmt.Errorf("ollama new: %w", err)
 	}
