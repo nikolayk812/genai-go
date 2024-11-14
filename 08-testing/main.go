@@ -72,7 +72,7 @@ func raggedAnswer(chatModel *ollama.LLM) (string, error) {
 }
 
 func buildStraightChat(chatModel llms.Model) ai.Chatter {
-	return ai.New(chatModel)
+	return ai.NewChat(chatModel)
 }
 
 func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
@@ -112,7 +112,7 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 	}
 	log.Printf("Relevant documents for RAG: %d\n", len(relevantDocs))
 
-	return ai.New(chatModel, ai.WithRAGContext(relevantDocs)), nil
+	return ai.NewChat(chatModel, ai.WithRAGContext(relevantDocs)), nil
 }
 
 func ingestion(store vectorstores.VectorStore) error {

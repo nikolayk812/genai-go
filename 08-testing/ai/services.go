@@ -42,7 +42,7 @@ func WithRAGContext(docs []schema.Document) ChatServiceOption {
 	}
 }
 
-func New(model llms.Model, opts ...ChatServiceOption) *ChatService {
+func NewChat(model llms.Model, opts ...ChatServiceOption) *ChatService {
 	system := `You are a helpful assistant.
 Your task is to answer questions by providing clear and concise answers.
 
