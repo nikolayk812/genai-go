@@ -15,6 +15,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/textsplitter"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
@@ -134,20 +135,19 @@ func ingestion(store vectorstores.VectorStore) error {
 			return fmt.Errorf("open file: %w", err)
 		}
 
-		var loader documentloaders.Loader
-
-		if strings.HasSuffix(d.Name(), ".txt") {
-			loader = documentloaders.NewText(file)
-		} else {
+		if !strings.HasSuffix(d.Name(), ".txt") {
 			return fmt.Errorf("unsupported file type: %s", d.Name())
 		}
 
-		doc, err := loader.Load(context.Background())
+		fileDocs, err := documentloaders.NewText(file).LoadAndSplit(
+			context.Background(),
+			textsplitter.NewMarkdownTextSplitter(textsplitter.WithChunkSize(1024), textsplitter.WithChunkOverlap(100)),
+		)
 		if err != nil {
 			return fmt.Errorf("load document (%s): %w", path, err)
 		}
 
-		docs = append(docs, doc...)
+		docs = append(docs, fileDocs...)
 
 		return nil
 	})
