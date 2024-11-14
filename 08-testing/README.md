@@ -42,7 +42,7 @@ The vector store to use is `weaviate` by default, but it can be changed to `pgve
 
 ## Running the Example
 
-To run the example, navigate to the `07-rag` directory and run the following command:
+To run the example, navigate to the `08-testing` directory and run the following command:
 
 ```sh
 go run .
