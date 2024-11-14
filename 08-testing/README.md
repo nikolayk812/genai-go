@@ -23,6 +23,8 @@ The vector store to use is `weaviate` by default, but it can be changed to `pgve
 - The image used for Weaviate is `semitechnologies/weaviate:1.27.2`.
 - The image used for PgVector is `pgvector/pgvector:pg16`.
 
+We are adding tests to demonstrate how to validate the answers of the language models. We will use a Validator Agent to do so.
+
 ### Main Functions
 
 - `main()`: The entry point of the application. It calls the `run()` function and logs any errors.
