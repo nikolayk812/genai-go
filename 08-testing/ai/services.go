@@ -95,3 +95,92 @@ func (s *ChatService) Chat(userMessage string) (string, error) {
 
 	return response, nil
 }
+
+type ValidatorAgent struct {
+	systemMessage string
+	chatModel     llms.Model
+	userMessage   string
+	response      string
+}
+
+func (v *ValidatorAgent) Response() string {
+	return v.response
+}
+
+func (v *ValidatorAgent) Validate(question string, answer string, reference string) (string, error) {
+	ctx := context.Background()
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, v.systemMessage),
+		llms.TextParts(llms.ChatMessageTypeHuman, fmt.Sprintf(v.userMessage, question, answer, reference)),
+	}
+
+	completion, err := v.chatModel.GenerateContent(
+		ctx, content,
+		llms.WithTemperature(0.00),
+		llms.WithTopK(1),
+		llms.WithSeed(42),
+	)
+	if err != nil {
+		return "", fmt.Errorf("llm generate content: %w", err)
+	}
+
+	response := ""
+	for _, choice := range completion.Choices {
+		response += choice.Content
+	}
+
+	v.response = response
+
+	return response, nil
+}
+
+func NewValidatorAgent(model llms.Model) *ValidatorAgent {
+	system := `
+### Instructions
+You are a strict validator.
+You will be provided with a question, an answer, and a reference.
+Your task is to validate whether the answer is correct for the given question, based on the reference.
+
+Follow these instructions:
+- Respond only 'yes', 'no' or 'unsure' and always include the reason for your response
+- Respond with 'yes' if the answer is correct
+- Respond with 'no' if the answer is incorrect
+- If you are unsure, simply respond with 'unsure'
+- Respond with 'no' if the answer is not clear or concise
+- Respond with 'no' if the answer is not based on the reference
+
+Your response must be a json object with the following structure:
+{
+	"response": "yes",
+	"reason": "The answer is correct because it is based on the reference provided."
+}
+
+### Example
+Question: Is Madrid the capital of Spain?
+Answer: No, it's Barcelona.
+Reference: The capital of Spain is Madrid
+###
+Response: {
+	"response": "no",
+	"reason": "The answer is incorrect because the reference states that the capital of Spain is Madrid."
+}
+""")`
+
+	user := `
+###
+Question: %s
+###
+Answer: %s
+###
+Reference: %s
+###
+`
+
+	v := &ValidatorAgent{
+		chatModel:     model,
+		systemMessage: system,
+		userMessage:   user,
+	}
+
+	return v
+}

@@ -6,10 +6,11 @@ import (
 	"testing"
 
 	"github.com/chewxy/math32"
+	"github.com/mdelapenya/genai-testcontainers-go/testing/ai"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
-func Test1(t *testing.T) {
+func Test1_oldSchool(t *testing.T) {
 	chatModel, err := buildChatModel()
 	if err != nil {
 		t.Fatalf("build chat model: %s", err)
@@ -38,7 +39,7 @@ func Test1(t *testing.T) {
 	})
 }
 
-func Test2(t *testing.T) {
+func Test2_embeddings(t *testing.T) {
 	chatModel, err := buildChatModel()
 	if err != nil {
 		t.Fatalf("build chat model: %s", err)
@@ -114,4 +115,50 @@ func cosineSimilarity(t *testing.T, x, y []float32) float32 {
 	}
 
 	return dot / (math32.Sqrt(nx) * math32.Sqrt(ny))
+}
+
+func Test3_validatorAgent(t *testing.T) {
+	reference := `
+- Answer must indicate that you can enable verbose logging in Testcontainers Desktop by setting the property cloud.logs.verbose to true in the ~/.testcontainers.properties file
+- Answer must indicate that you can enable verbose logging in Testcontainers Desktop by adding the --verbose flag when running the cli
+`
+
+	chatModel, err := buildChatModel()
+	if err != nil {
+		t.Fatalf("build chat model: %s", err)
+	}
+
+	validatorAgent := ai.NewValidatorAgent(chatModel)
+
+	t.Run("straight-answer", func(t *testing.T) {
+		answer, err := straightAnswer(chatModel)
+		if err != nil {
+			t.Fatalf("straight chat: %s", err)
+		}
+
+		resp, err := validatorAgent.Validate(question, answer, reference)
+		if err != nil {
+			t.Fatalf("straight chat: %s", err)
+		}
+
+		if resp != "yes" {
+			t.Fatalf("straight chat: %s", validatorAgent.Response())
+		}
+	})
+
+	t.Run("ragged-answer", func(t *testing.T) {
+		answer, err := raggedAnswer(chatModel)
+		if err != nil {
+			t.Fatalf("ragged chat: %s", err)
+		}
+
+		resp, err := validatorAgent.Validate(question, answer, reference)
+		if err != nil {
+			t.Fatalf("ragged chat: %s", err)
+		}
+
+		if resp != "yes" {
+			t.Fatalf("ragged chat: %s", validatorAgent.Response())
+		}
+	})
 }
