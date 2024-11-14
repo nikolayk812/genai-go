@@ -59,7 +59,6 @@ The application will start two containerized Ollama language models and generate
 
 Alternatively, you can also specify a logging configuration file that includes the desired log level. For example, you can create a file named `logging.conf` with the following content:
 
-```
 [loggers]
 keys=root
 
@@ -85,7 +84,6 @@ args=
 
 [formatter_simple]
 format=%(asctime)s - %(name)-15j - %(levelname)-8s - %(message)s
-```
 
 Then, you can run Testcontainers Desktop with the `--config` option to specify the logging configuration file.
 2024/11/14 12:54:34 Ingesting document: knowledge/txt/simple-local-development-with-testcontainers-desktop.txt
