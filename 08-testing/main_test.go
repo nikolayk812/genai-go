@@ -25,7 +25,9 @@ func Test1_oldSchool(t *testing.T) {
 		}
 	}
 
-	t.Run("straight-answer", func(tt *testing.T) {
+	t.Run("straight-answer/pgvector", func(tt *testing.T) {
+		tt.Setenv("VECTOR_STORE", "pgvector")
+
 		answer, err := straightAnswer(chatModel)
 		if err != nil {
 			tt.Fatalf("straight chat: %s", err)
@@ -34,7 +36,27 @@ func Test1_oldSchool(t *testing.T) {
 		containsFn(tt, answer)
 	})
 
-	t.Run("ragged-answer", func(tt *testing.T) {
+	t.Run("ragged-answer/pgvector", func(tt *testing.T) {
+		tt.Setenv("VECTOR_STORE", "pgvector")
+
+		answer, err := raggedAnswer(chatModel)
+		if err != nil {
+			tt.Fatalf("straight chat: %s", err)
+		}
+
+		containsFn(tt, answer)
+	})
+
+	t.Run("straight-answer/weaviate", func(tt *testing.T) {
+		answer, err := straightAnswer(chatModel)
+		if err != nil {
+			tt.Fatalf("straight chat: %s", err)
+		}
+
+		containsFn(tt, answer)
+	})
+
+	t.Run("ragged-answer/weaviate", func(tt *testing.T) {
 		answer, err := raggedAnswer(chatModel)
 		if err != nil {
 			tt.Fatalf("straight chat: %s", err)
