@@ -13,6 +13,7 @@ import (
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
@@ -40,27 +41,34 @@ func run() error {
 		return fmt.Errorf("build chat model: %s", err)
 	}
 
-	var chatter ai.Chatter
-
-	chatter = buildStraightChat(chatModel)
-	fmt.Println(">> Straight answer:")
-	err = chatter.Chat(question)
+	resp, err := straightAnswer(chatModel)
 	if err != nil {
 		log.Fatalf("straight chat: %s", err)
 	}
-	fmt.Println() // Add a new line to separate the answers after streaming the first one
+	fmt.Println(">> Straight answer:\n", resp)
 
-	chatter, err = buildRaggedChat(chatModel)
+	resp, err = raggedAnswer(chatModel)
 	if err != nil {
-		return fmt.Errorf("build ragged chat: %s", err)
-	}
-
-	fmt.Println(">> Ragged answer:")
-	if err := chatter.Chat(question); err != nil {
 		return fmt.Errorf("ragged chat: %s", err)
 	}
+	fmt.Println(">> Ragged answer:\n", resp)
 
 	return nil
+}
+
+func straightAnswer(chatModel *ollama.LLM) (string, error) {
+	chatter := buildStraightChat(chatModel)
+
+	return chatter.Chat(question)
+}
+
+func raggedAnswer(chatModel *ollama.LLM) (string, error) {
+	chatter, err := buildRaggedChat(chatModel)
+	if err != nil {
+		return "", fmt.Errorf("build ragged chat: %s", err)
+	}
+
+	return chatter.Chat(question)
 }
 
 func buildStraightChat(chatModel llms.Model) ai.Chatter {

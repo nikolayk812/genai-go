@@ -9,7 +9,7 @@ import (
 )
 
 type Chatter interface {
-	Chat(userMessage string) error
+	Chat(userMessage string) (string, error)
 }
 
 type Summarizer interface {
@@ -64,7 +64,7 @@ Follow these instructions:
 	return cs
 }
 
-func (s *ChatService) Chat(userMessage string) error {
+func (s *ChatService) Chat(userMessage string) (string, error) {
 	ctx := context.Background()
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, s.systemMessage),
@@ -78,19 +78,20 @@ func (s *ChatService) Chat(userMessage string) error {
 
 	content = append(content, llms.TextParts(llms.ChatMessageTypeHuman, userMessage))
 
-	_, err := s.chatModel.GenerateContent(
+	completion, err := s.chatModel.GenerateContent(
 		ctx, content,
 		llms.WithTemperature(0.00),
 		llms.WithTopK(1),
 		llms.WithSeed(42),
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-			fmt.Print(string(chunk))
-			return nil
-		}),
 	)
 	if err != nil {
-		return fmt.Errorf("llm generate content: %w", err)
+		return "", fmt.Errorf("llm generate content: %w", err)
 	}
 
-	return nil
+	response := ""
+	for _, choice := range completion.Choices {
+		response += choice.Content
+	}
+
+	return response, nil
 }
