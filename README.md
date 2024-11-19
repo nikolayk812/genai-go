@@ -34,3 +34,35 @@ To run the examples, navigate to the desired directory and run the `go run .` co
 cd 1-hello-world
 go run .
 ```
+
+## Docker Images
+
+All the Docker images used in these example projects are available on Docker Hub under the https://hub.docker.com/u/mdelapenya repository. They have been built using an automated process in GitHub Actions, and you can find the source code in the following Github repository: https://github.com/mdelapenya/dockerize-ollama-models.
+
+Each image basically starts from a base Ollama image, and then pulls the required models to run the examples. As a consequence, they are ready to be used in the examples without any additional setup, for you to just pull the given image and run it.
+
+The images used in the examples are described below, grouped by model type.
+
+#### Multilingual large language models
+
+The Llama 3.2 collection of multilingual large language models (LLMs) is a collection of pretrained and instruction-tuned generative models in 1B and 3B sizes (text in/text out). The Llama 3.2 instruction-tuned text only models are optimized for multilingual dialogue use cases, including agentic retrieval and summarization tasks. They outperform many of the available open source and closed chat models on common industry benchmarks.
+
+- `mdelapenya/llama3.2:0.3.13-1b`
+- `mdelapenya/llama3.2:0.3.13-3b`
+
+#### Decoder language models
+
+Qwen2 is a language model series including decoder language models of different model sizes. For each size, we release the base language model and the aligned chat model. It is based on the Transformer architecture with SwiGLU activation, attention QKV bias, group query attention, etc. Additionally, we have an improved tokenizer adaptive to multiple natural languages and codes.
+
+- `mdelapenya/qwen2:0.3.13-0.5b`
+
+#### Vision models
+
+Moondream is a small vision language model designed to run efficiently on edge devices. 
+- `mdelapenya/moondream:0.3.13-1.8b`
+
+#### Sentence transformers models
+
+This model maps sentences & paragraphs to a 384 dimensional dense vector space and can be used for tasks like clustering or semantic search.
+
+- `mdelapenya/all-minilm:0.3.13-22m`
