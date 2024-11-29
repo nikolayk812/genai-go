@@ -50,6 +50,7 @@ func run() (err error) {
 		llms.TextParts(llms.ChatMessageTypeHuman, "Provide 3 short bullet points explaining why Go is awesome"),
 	}
 
+	// The response from the model happens when the model finishes processing the input, which it's usually slow.
 	completion, err := llm.GenerateContent(ctx, content)
 	if err != nil {
 		return fmt.Errorf("llm generate content: %w", err)

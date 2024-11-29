@@ -49,6 +49,7 @@ func run() (err error) {
 		llms.TextParts(llms.ChatMessageTypeSystem, "Give me a detailed and long explanation of why Testcontainers for Go is great"),
 	}
 
+	// Streaming is needed because models are usually slow in responding, so showing progress is important.
 	_, err = llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))
 		return nil
