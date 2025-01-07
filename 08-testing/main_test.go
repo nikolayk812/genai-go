@@ -25,44 +25,46 @@ func Test1_oldSchool(t *testing.T) {
 		}
 	}
 
-	t.Run("straight-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
 
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight chat: %s", err)
-		}
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight chat: %s", err)
+			}
 
-		containsFn(tt, answer)
+			containsFn(tt, answer)
+		})
+
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight chat: %s", err)
+			}
+
+			containsFn(tt, answer)
+		})
 	})
 
-	t.Run("ragged-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("weaviate", func(t *testing.T) {
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight chat: %s", err)
+			}
 
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight chat: %s", err)
-		}
+			containsFn(tt, answer)
+		})
 
-		containsFn(tt, answer)
-	})
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight chat: %s", err)
+			}
 
-	t.Run("straight-answer/weaviate", func(tt *testing.T) {
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight chat: %s", err)
-		}
-
-		containsFn(tt, answer)
-	})
-
-	t.Run("ragged-answer/weaviate", func(tt *testing.T) {
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight chat: %s", err)
-		}
-
-		containsFn(tt, answer)
+			containsFn(tt, answer)
+		})
 	})
 }
 
@@ -103,44 +105,46 @@ func Test2_embeddings(t *testing.T) {
 		}
 	}
 
-	t.Run("straight-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
 
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight answer: %s", err)
-		}
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight answer: %s", err)
+			}
 
-		similarityFn(tt, answer)
+			similarityFn(tt, answer)
+		})
+
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("ragged answer: %s", err)
+			}
+
+			similarityFn(tt, answer)
+		})
 	})
 
-	t.Run("ragged-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("weaviate", func(t *testing.T) {
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight answer: %s", err)
+			}
 
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("ragged answer: %s", err)
-		}
+			similarityFn(tt, answer)
+		})
 
-		similarityFn(tt, answer)
-	})
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("ragged answer: %s", err)
+			}
 
-	t.Run("straight-answer/weaviate", func(tt *testing.T) {
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight answer: %s", err)
-		}
-
-		similarityFn(tt, answer)
-	})
-
-	t.Run("ragged-answer/weaviate", func(tt *testing.T) {
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("ragged answer: %s", err)
-		}
-
-		similarityFn(tt, answer)
+			similarityFn(tt, answer)
+		})
 	})
 }
 
@@ -201,43 +205,45 @@ func Test3_validatorAgent(t *testing.T) {
 		}
 	}
 
-	t.Run("straight-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("pgvector", func(t *testing.T) {
+		t.Setenv("VECTOR_STORE", "pgvector")
 
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight answer: %s", err)
-		}
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight answer: %s", err)
+			}
 
-		validateFn(tt, answer)
+			validateFn(tt, answer)
+		})
+
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("ragged answer: %s", err)
+			}
+
+			validateFn(tt, answer)
+		})
 	})
 
-	t.Run("ragged-answer/pgvector", func(tt *testing.T) {
-		tt.Setenv("VECTOR_STORE", "pgvector")
+	t.Run("weaviate", func(t *testing.T) {
+		t.Run("straight-answer", func(tt *testing.T) {
+			answer, err := straightAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("straight answer: %s", err)
+			}
 
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("ragged answer: %s", err)
-		}
+			validateFn(tt, answer)
+		})
 
-		validateFn(tt, answer)
-	})
+		t.Run("ragged-answer", func(tt *testing.T) {
+			answer, err := raggedAnswer(chatModel)
+			if err != nil {
+				tt.Fatalf("ragged answer: %s", err)
+			}
 
-	t.Run("straight-answer/weaviate", func(tt *testing.T) {
-		answer, err := straightAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("straight answer: %s", err)
-		}
-
-		validateFn(tt, answer)
-	})
-
-	t.Run("ragged-answer/weaviate", func(tt *testing.T) {
-		answer, err := raggedAnswer(chatModel)
-		if err != nil {
-			tt.Fatalf("ragged answer: %s", err)
-		}
-
-		validateFn(tt, answer)
+			validateFn(tt, answer)
+		})
 	})
 }
