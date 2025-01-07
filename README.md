@@ -42,7 +42,7 @@ All the Docker images used in these example projects are available on Docker Hub
 
 Each image basically starts from a base Ollama image, and then pulls the required models to run the examples. As a consequence, they are ready to be used in the examples without any additional setup, for you to just pull the given image and run it.
 
-The images used in the examples are described below, grouped by model type.
+The images used in the examples are described below, grouped by model type. You can pull them using the `pull-images.sh` script.
 
 #### Multilingual large language models
 
