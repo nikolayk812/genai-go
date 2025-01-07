@@ -21,7 +21,7 @@ func Test1_oldSchool(t *testing.T) {
 		innerT.Helper()
 
 		if !strings.Contains(answer, "cloud.logs.verbose") {
-			innerT.Fatalf("contains: %s", answer)
+			innerT.Fatalf("%s does not contain 'cloud.logs.verbose'", answer)
 		}
 	}
 
