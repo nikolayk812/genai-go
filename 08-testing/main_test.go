@@ -201,7 +201,7 @@ func Test3_validatorAgent(t *testing.T) {
 		}
 
 		if jsonResp.Response != "yes" {
-			innerT.Fatalf("chat: %s", jsonResp.Reason)
+			innerT.Fatalf("chat: %+v", jsonResp)
 		}
 	}
 
