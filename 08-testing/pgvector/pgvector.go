@@ -5,7 +5,6 @@ import (
 
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
@@ -29,7 +28,7 @@ func mustGetConnection(ctx context.Context) string {
 		tcpostgres.WithDatabase("testdb"),
 		tcpostgres.WithUsername("testuser"),
 		tcpostgres.WithPassword("testpass"),
-		testcontainers.WithWaitStrategy(wait.ForLog("database system is ready to accept connections").WithOccurrence(2)),
+		tcpostgres.BasicWaitStrategies(),
 		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
 				Name: "pgvector-db",
