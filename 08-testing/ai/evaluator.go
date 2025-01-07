@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	// systemPrompt is the system message for the validator, which instructs it to validate the answer
+	// systemPrompt is the system message for the evaluator, which instructs it to validate the answer
 	// based on the question and reference. The prompt follows some instructions to validate the answer,
 	// such as responding with 'yes', 'no' or 'unsure' and always including the reason for your response.
-	// It also instructs the validator to respond with a json object with the following structure:
+	// It also instructs the evaluator to respond with a json object with the following structure:
 	// {
 	// 	"response": "yes",
 	// 	"reason": "The answer is correct because it is based on the reference provided."
@@ -59,17 +59,17 @@ Reference: %s
 `
 )
 
-type Validator interface {
-	Validate(question string, answer string, reference string) (string, error)
+type Evaluator interface {
+	Evaluate(question string, answer string, reference string) (string, error)
 }
 
-type ValidatorAgent struct {
+type EvaluatorAgent struct {
 	systemMessage string
 	chatModel     llms.Model
 	userMessage   string
 }
 
-func (v *ValidatorAgent) Validate(question string, answer string, reference string) (string, error) {
+func (v *EvaluatorAgent) Evaluate(question string, answer string, reference string) (string, error) {
 	ctx := context.Background()
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, v.systemMessage),
@@ -94,8 +94,8 @@ func (v *ValidatorAgent) Validate(question string, answer string, reference stri
 	return response, nil
 }
 
-func NewValidatorAgent(model llms.Model) *ValidatorAgent {
-	v := &ValidatorAgent{
+func NewEvaluatorAgent(model llms.Model) *EvaluatorAgent {
+	v := &EvaluatorAgent{
 		chatModel:     model,
 		systemMessage: systemPrompt,
 		userMessage:   userPrompt,

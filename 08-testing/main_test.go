@@ -168,7 +168,7 @@ func cosineSimilarity(t *testing.T, x, y []float32) float32 {
 	return dot / (math32.Sqrt(nx) * math32.Sqrt(ny))
 }
 
-func Test3_validatorAgent(t *testing.T) {
+func Test3_evaluatorAgent(t *testing.T) {
 	reference := `
 - Answer must indicate that you can enable verbose logging in Testcontainers Desktop by setting the property cloud.logs.verbose to true in the ~/.testcontainers.properties file
 - Answer must indicate that you can enable verbose logging in Testcontainers Desktop by adding the --verbose flag when running the cli
@@ -179,12 +179,12 @@ func Test3_validatorAgent(t *testing.T) {
 		t.Fatalf("build chat model: %s", err)
 	}
 
-	validatorAgent := ai.NewValidatorAgent(chatModel)
+	evaluatorAgent := ai.NewEvaluatorAgent(chatModel)
 
-	validateFn := func(innerT *testing.T, validator ai.Validator, answer string) {
+	evaluateFn := func(innerT *testing.T, evaluator ai.Evaluator, answer string) {
 		innerT.Helper()
 
-		resp, err := validator.Validate(question, answer, reference)
+		resp, err := evaluator.Evaluate(question, answer, reference)
 		if err != nil {
 			innerT.Fatalf("validate: %s", err)
 		}
@@ -214,7 +214,7 @@ func Test3_validatorAgent(t *testing.T) {
 				tt.Fatalf("straight answer: %s", err)
 			}
 
-			validateFn(tt, validatorAgent, answer)
+			evaluateFn(tt, evaluatorAgent, answer)
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
@@ -223,7 +223,7 @@ func Test3_validatorAgent(t *testing.T) {
 				tt.Fatalf("ragged answer: %s", err)
 			}
 
-			validateFn(tt, validatorAgent, answer)
+			evaluateFn(tt, evaluatorAgent, answer)
 		})
 	})
 
@@ -234,7 +234,7 @@ func Test3_validatorAgent(t *testing.T) {
 				tt.Fatalf("straight answer: %s", err)
 			}
 
-			validateFn(tt, validatorAgent, answer)
+			evaluateFn(tt, evaluatorAgent, answer)
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
@@ -243,7 +243,7 @@ func Test3_validatorAgent(t *testing.T) {
 				tt.Fatalf("ragged answer: %s", err)
 			}
 
-			validateFn(tt, validatorAgent, answer)
+			evaluateFn(tt, evaluatorAgent, answer)
 		})
 	})
 }

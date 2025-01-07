@@ -1,6 +1,6 @@
 # 08-testing
 
-Contains a simple example of using a language model to validate the answers of other language models, using a Validator Agent.
+Contains a simple example of using a language model to validate the answers of other language models, using an Evaluator Agent.
 
 ## Libraries Involved
 
@@ -23,7 +23,7 @@ The vector store to use is `weaviate` by default, but it can be changed to `pgve
 - The image used for Weaviate is `semitechnologies/weaviate:1.27.2`.
 - The image used for PgVector is `pgvector/pgvector:pg16`.
 
-We are adding tests to demonstrate how to validate the answers of the language models. We will use a Validator Agent to do so.
+We are adding tests to demonstrate how to validate the answers of the language models. We will use an Evaluator Agent to do so.
 
 ### Main Functions
 
@@ -111,10 +111,10 @@ In a second iteration, we remembered that we now know how to create emebeddings 
 go test -timeout 600s -run ^Test2_embeddings/weaviate$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
 ```
 
-## How to test this (3): Validator Agents
+## How to test this (3): Evaluator Agents
 
-Finally, in a third iteration, we realised that we have a lot of power with LLMs, and it would be cool to use one to validate the answers. We could be as strict as needed defining the System and User prompts, in order for the validator agent to be very specific about the answer. We can even provide an output format for the answer, so the validator agent can check if the answer is correct. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test3_validatorAgent` test function, and then run the tests:
+Finally, in a third iteration, we realised that we have a lot of power with LLMs, and it would be cool to use one to validate the answers. We could be as strict as needed defining the System and User prompts, in order for the evaluator agent to be very specific about the answer. We can even provide an output format for the answer, so the evaluator agent can check if the answer is correct. Just take a look at the `main_test.go` file in the `08-testing` directory, and its `Test3_evaluatorAgent` test function, and then run the tests:
 
 ```shell
-go test -timeout 600s -run ^Test3_validatorAgent/weaviate$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
+go test -timeout 600s -run ^Test3_evaluatorAgent/weaviate$ github.com/mdelapenya/genai-testcontainers-go/testing -v -count=1
 ```
