@@ -1,6 +1,6 @@
 # 10-functions
 
-Contains an example of using functions in a Testcontainerized Ollama language model.
+Contains an example of using functions in a containerized Ollama language model.
 
 ## Libraries Involved
 
