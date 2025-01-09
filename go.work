@@ -10,4 +10,5 @@ use (
 	./07-rag
 	./08-testing
 	./09-huggingface
+	./10-functions
 )
