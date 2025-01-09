@@ -19,7 +19,7 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.5.4-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name: "embeddings-model",
 		},

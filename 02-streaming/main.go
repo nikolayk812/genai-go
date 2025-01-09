@@ -18,7 +18,7 @@ func main() {
 }
 
 func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/qwen2:0.3.13-0.5b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+	c, err := tcollama.Run(context.Background(), "mdelapenya/qwen2:0.5.4-0.5b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name: "chat-model",
 		},

@@ -48,22 +48,22 @@ The images used in the examples are described below, grouped by model type. You 
 
 The Llama 3.2 collection of multilingual large language models (LLMs) is a collection of pretrained and instruction-tuned generative models in 1B and 3B sizes (text in/text out). The Llama 3.2 instruction-tuned text only models are optimized for multilingual dialogue use cases, including agentic retrieval and summarization tasks. They outperform many of the available open source and closed chat models on common industry benchmarks.
 
-- `mdelapenya/llama3.2:0.3.13-1b`
-- `mdelapenya/llama3.2:0.3.13-3b`
+- `mdelapenya/llama3.2:0.5.4-1b`
+- `mdelapenya/llama3.2:0.5.4-3b`
 
 #### Decoder language models
 
 Qwen2 is a language model series including decoder language models of different model sizes. For each size, we release the base language model and the aligned chat model. It is based on the Transformer architecture with SwiGLU activation, attention QKV bias, group query attention, etc. Additionally, we have an improved tokenizer adaptive to multiple natural languages and codes.
 
-- `mdelapenya/qwen2:0.3.13-0.5b`
+- `mdelapenya/qwen2:0.5.4-0.5b`
 
 #### Vision models
 
 Moondream is a small vision language model designed to run efficiently on edge devices. 
-- `mdelapenya/moondream:0.3.13-1.8b`
+- `mdelapenya/moondream:0.5.4-1.8b`
 
 #### Sentence transformers models
 
 This model maps sentences & paragraphs to a 384 dimensional dense vector space and can be used for tasks like clustering or semantic search.
 
-- `mdelapenya/all-minilm:0.3.13-22m`
+- `mdelapenya/all-minilm:0.5.4-22m`

@@ -96,7 +96,7 @@ Answer the question considering the following relevant content:
 }
 
 func buildChatModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.3.13-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.5.4-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name: "chat-model",
 		},
@@ -120,7 +120,7 @@ func buildChatModel() (*ollama.LLM, error) {
 }
 
 func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.3.13-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.5.4-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Name: "embeddings-model",
 		},
