@@ -52,7 +52,7 @@ func run() error {
 }
 
 func straightAnswer(chatModel *ollama.LLM) (string, error) {
-	chatter := buildStraightChat(chatModel)
+	chatter := ai.NewChat(chatModel)
 
 	return chatter.Chat(question)
 }
@@ -64,10 +64,6 @@ func raggedAnswer(chatModel *ollama.LLM) (string, error) {
 	}
 
 	return chatter.Chat(question)
-}
-
-func buildStraightChat(chatModel llms.Model) ai.Chatter {
-	return ai.NewChat(chatModel)
 }
 
 func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
