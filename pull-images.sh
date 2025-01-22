@@ -1,5 +1,7 @@
 #! /bin/bash
 
+docker pull testcontainers/ryuk:0.11.0
+
 docker pull mdelapenya/llama3.2:0.5.4-1b
 docker pull mdelapenya/llama3.2:0.5.4-3b
 docker pull mdelapenya/qwen2:0.5.4-0.5b
