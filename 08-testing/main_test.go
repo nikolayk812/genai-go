@@ -103,6 +103,7 @@ func Test2_embeddings(t *testing.T) {
 		if sim <= 0.80 {
 			innerT.Fatalf("similarity is %f: %s", sim, answer)
 		}
+		t.Logf("similarity is %f: %s", sim, answer)
 	}
 
 	t.Run("pgvector", func(t *testing.T) {
