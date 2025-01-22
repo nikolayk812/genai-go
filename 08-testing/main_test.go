@@ -182,10 +182,10 @@ func Test3_evaluatorAgent(t *testing.T) {
 
 	evaluatorAgent := ai.NewEvaluatorAgent(chatModel)
 
-	evaluateFn := func(innerT *testing.T, evaluator ai.Evaluator, answer string) {
+	evaluateFn := func(innerT *testing.T, answer string) {
 		innerT.Helper()
 
-		resp, err := evaluator.Evaluate(question, answer, reference)
+		resp, err := evaluatorAgent.Evaluate(question, answer, reference)
 		if err != nil {
 			innerT.Fatalf("validate: %s", err)
 		}
@@ -215,7 +215,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 				tt.Fatalf("straight answer: %s", err)
 			}
 
-			evaluateFn(tt, evaluatorAgent, answer)
+			evaluateFn(tt, answer)
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
@@ -224,7 +224,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 				tt.Fatalf("ragged answer: %s", err)
 			}
 
-			evaluateFn(tt, evaluatorAgent, answer)
+			evaluateFn(tt, answer)
 		})
 	})
 
@@ -235,7 +235,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 				tt.Fatalf("straight answer: %s", err)
 			}
 
-			evaluateFn(tt, evaluatorAgent, answer)
+			evaluateFn(tt, answer)
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
@@ -244,7 +244,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 				tt.Fatalf("ragged answer: %s", err)
 			}
 
-			evaluateFn(tt, evaluatorAgent, answer)
+			evaluateFn(tt, answer)
 		})
 	})
 }
