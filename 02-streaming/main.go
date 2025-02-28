@@ -1,52 +1,55 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
-
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
+	"io"
+	"log"
+	"net/http"
 )
 
+// ollama run llama3.2
+
 func main() {
-	if err := run(); err != nil {
-		log.Fatalf("run: %s", err)
+	ctx := context.Background()
+
+	httpClient := &http.Client{
+		Transport: &CustomRoundTripper{
+			Transport: http.DefaultTransport,
+		},
+	}
+
+	if err := run(ctx, httpClient); err != nil {
+		log.Fatalf("run: %v", err)
 	}
 }
 
-func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/qwen2:0.5.4-0.5b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "chat-model",
-		},
-		Reuse: true,
-	}))
+func run(ctx context.Context, httpCli *http.Client) error {
+	llm, err := ollama.New(
+		ollama.WithModel("llama3.2"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return err
-	}
-	defer func() {
-		err = testcontainers.TerminateContainer(c)
-		if err != nil {
-			err = fmt.Errorf("terminate container: %w", err)
-		}
-	}()
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return fmt.Errorf("connection string: %w", err)
+		return fmt.Errorf("ollama.New: %w", err)
 	}
 
-	llm, err := ollama.New(ollama.WithModel("qwen2:0.5b"), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return fmt.Errorf("ollama new: %w", err)
-	}
+	//llm, err := openai.New(
+	//	openai.WithModel("gpt-4"),
+	//	openai.WithToken(os.Getenv("OPENAI_API_KEY")),
+	//	openai.WithHTTPClient(httpCli),
+	//)
+	//if err != nil {
+	//	return fmt.Errorf("openai.New: %w", err)
+	//}
 
-	ctx := context.Background()
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, "Give me a detailed and long explanation of why Testcontainers for Go is great"),
+		// does not work for "system" type with Ollama
+		llms.TextParts(llms.ChatMessageTypeHuman, "Give me a detailed and long explanation of why Testcontainers for Go is great"),
 	}
 
 	// Streaming is needed because models are usually slow in responding, so showing progress is important.
@@ -54,9 +57,38 @@ func run() (err error) {
 		fmt.Print(string(chunk))
 		return nil
 	}))
-	if err != nil {
-		return fmt.Errorf("llm generate content: %w", err)
-	}
 
 	return nil
+}
+
+// CustomRoundTripper logs each request
+type CustomRoundTripper struct {
+	Transport http.RoundTripper
+}
+
+func (c *CustomRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Log method and URL
+	log.Printf("Request: %s %s", req.Method, req.URL)
+
+	if req.Body == nil {
+		return http.DefaultTransport.RoundTrip(req)
+	}
+
+	bodyBytes, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil, fmt.Errorf("io.ReadAll: %w", err)
+	}
+
+	// Pretty-print the JSON body
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, bodyBytes, "", "  "); err != nil {
+		return nil, fmt.Errorf("json.Indent: %w", err)
+	}
+
+	log.Printf("Request Body: %s", prettyJSON.String())
+
+	// Reset the request body so it can be read again
+	req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return c.Transport.RoundTrip(req)
 }

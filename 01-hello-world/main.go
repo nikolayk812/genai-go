@@ -8,11 +8,13 @@ import (
 	"log"
 )
 
+// ollama run llama3.2
+
 func main() {
 	ctx := context.Background()
 
 	if err := run(ctx); err != nil {
-		log.Fatalf("run: %s", err)
+		log.Fatalf("run: %v", err)
 	}
 }
 
@@ -42,9 +44,19 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("llm.GenerateContent: %w", err)
 	}
+	if completion == nil {
+		return fmt.Errorf("completion is nil")
+	}
 
 	for _, choice := range completion.Choices {
+		if choice == nil {
+			continue
+		}
 		fmt.Println(choice.Content)
+
+		if choice.StopReason != "" {
+			fmt.Println("Stop reason: ", choice.StopReason)
+		}
 	}
 
 	return nil
