@@ -3,42 +3,47 @@ package main
 import (
 	"context"
 	"fmt"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
+	"github.com/tmc/langchaingo/vectorstores/weaviate"
 	"log"
+	"net/http"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-
-	"github.com/mdelapenya/genai-testcontainers-go/rag/weaviate"
 )
 
 func main() {
-	if err := run(); err != nil {
+	ctx := context.Background()
+
+	if err := run(ctx); err != nil {
 		log.Fatalf("run: %s", err)
 	}
 }
 
-func run() error {
-	embeddingLLM, err := buildEmbeddingModel()
+func run(ctx context.Context) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(),
+	}
+
+	embeddingLLM, err := buildEmbeddingModel(httpCli)
 	if err != nil {
-		return fmt.Errorf("build embedding model: %w", err)
+		return fmt.Errorf("buildEmbeddingModel: %w", err)
 	}
 
 	embedder, err := embeddings.NewEmbedder(embeddingLLM)
 	if err != nil {
-		return fmt.Errorf("new embedder: %w", err)
+		return fmt.Errorf("embeddings.NewEmbedder: %w", err)
 	}
 
 	store, err := buildEmbeddingStore(embedder)
 	if err != nil {
-		return fmt.Errorf("build embedding store: %w", err)
+		return fmt.Errorf("buildEmbeddingStore: %w", err)
 	}
 
-	if err := ingestion(store); err != nil {
+	if err := ingestion(ctx, store); err != nil {
 		return fmt.Errorf("ingestion: %w", err)
 	}
 
@@ -50,9 +55,11 @@ func run() error {
 		//vectorstores.WithDeduplicater(vectorstores.NewSimpleDeduplicater()), //  This is useful to prevent wasting time on creating an embedding
 	}
 
-	relevantDocs, err := store.SimilaritySearch(context.Background(), "What is my favorite sport?", 1, optionsVector...)
+	originalQuestion := "What is my favorite sport?"
+
+	relevantDocs, err := store.SimilaritySearch(ctx, originalQuestion, 1, optionsVector...)
 	if err != nil {
-		return fmt.Errorf("similarity search: %w", err)
+		return fmt.Errorf("store.SimilaritySearch: %w", err)
 	}
 
 	if len(relevantDocs) == 0 {
@@ -60,99 +67,75 @@ func run() error {
 		return nil
 	}
 
-	chatLLM, err := buildChatModel()
+	chatLLM, err := buildChatModel(httpCli)
 	if err != nil {
 		return fmt.Errorf("build chat model: %w", err)
 	}
 
-	response := fmt.Sprintf(`
-What is your favourite sport?
-
-Answer the question considering the following relevant content:
+	raggedQuestion := fmt.Sprintf(`
 %s
-`, relevantDocs[0].PageContent)
 
-	fmt.Println(response)
+Answer the question considering the following relevant content, be very confident:
 
-	ctx := context.Background()
-	originalContent := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, response),
+%s
+`, originalQuestion, relevantDocs[0].PageContent)
+
+	fmt.Println(raggedQuestion)
+
+	raggedContent := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, raggedQuestion),
 	}
 
-	_, err = chatLLM.GenerateContent(
-		ctx, originalContent,
+	if _, err := chatLLM.GenerateContent(ctx, raggedContent,
 		llms.WithTemperature(0.0001),
 		llms.WithTopK(1),
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Print(string(chunk))
 			return nil
 		}),
-	)
-	if err != nil {
-		return fmt.Errorf("llm generate original content: %w", err)
+	); err != nil {
+		return fmt.Errorf("chatLLM.GenerateContent: %w", err)
 	}
 
 	return nil
 }
 
-func buildChatModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.5.4-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "chat-model",
-		},
-		Reuse: true,
-	}))
+func buildChatModel(httpCli *http.Client) (llms.Model, error) {
+	llm, err := ollama.New(
+		ollama.WithModel("llama3.2"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return nil, err
-	}
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("connection string: %w", err)
-	}
-
-	llm, err := ollama.New(ollama.WithModel("llama3.2:1b"), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return nil, fmt.Errorf("ollama new: %w", err)
+		return nil, fmt.Errorf("ollama.New: %w", err)
 	}
 
 	return llm, nil
 }
 
-func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.5.4-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "embeddings-model",
-		},
-		Reuse: true,
-	}))
+func buildEmbeddingModel(httpCli *http.Client) (embeddings.EmbedderClient, error) {
+	llm, err := ollama.New(
+		ollama.WithModel("nomic-embed-text:v1.5"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return nil, err
-	}
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("connection string: %w", err)
-	}
-
-	llm, err := ollama.New(ollama.WithModel("all-minilm:22m"), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return nil, fmt.Errorf("ollama new: %w", err)
+		return nil, fmt.Errorf("ollama.New: %w", err)
 	}
 
 	return llm, nil
 }
 
 func buildEmbeddingStore(embedder embeddings.Embedder) (vectorstores.VectorStore, error) {
-	store, err := weaviate.NewStore(context.Background(), embedder)
-	if err != nil {
-		return nil, fmt.Errorf("weaviate new store: %w", err)
-	}
-
-	return store, nil
+	return weaviate.New(
+		weaviate.WithScheme("http"),
+		weaviate.WithHost("localhost:8080"),
+		weaviate.WithIndexName("Testcontainers"),
+		weaviate.WithEmbedder(embedder),
+	)
 }
 
-func ingestion(store vectorstores.VectorStore) error {
+func ingestion(ctx context.Context, store vectorstores.VectorStore) error {
 	docs := []schema.Document{
 		{
 			PageContent: "I like football",
@@ -162,9 +145,8 @@ func ingestion(store vectorstores.VectorStore) error {
 		},
 	}
 
-	_, err := store.AddDocuments(context.Background(), docs)
-	if err != nil {
-		return fmt.Errorf("add documents: %w", err)
+	if _, err := store.AddDocuments(ctx, docs); err != nil {
+		return fmt.Errorf("store.AddDocuments: %w", err)
 	}
 
 	return nil

@@ -6,14 +6,28 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
+	"time"
 )
 
 type LoggingRoundTripper struct {
 	Transport http.RoundTripper
 }
 
-func NewLoggingRoundTripper(transport http.RoundTripper) *LoggingRoundTripper {
+func NewLoggingRoundTripper() *LoggingRoundTripper {
+	transport := &http.Transport{
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		DialContext: (&net.Dialer{
+			Timeout:   5 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	}
+
 	return &LoggingRoundTripper{Transport: transport}
 }
 

@@ -22,7 +22,7 @@ func main() {
 
 func run(ctx context.Context) error {
 	httpCli := &http.Client{
-		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
+		Transport: internalhttp.NewLoggingRoundTripper(),
 	}
 
 	llm, err := ollama.New(

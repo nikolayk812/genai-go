@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	internalhttp "github.com/nikolayk812/genai-go/internal/http"
-	"log"
-	"net/http"
-
 	"github.com/chewxy/math32"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/ollama"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -29,7 +28,7 @@ func main() {
 
 func run(ctx context.Context, docs []string) error {
 	httpCli := &http.Client{
-		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
+		Transport: internalhttp.NewLoggingRoundTripper(),
 	}
 
 	llm, err := ollama.New(
@@ -40,6 +39,15 @@ func run(ctx context.Context, docs []string) error {
 	if err != nil {
 		return fmt.Errorf("ollama.New: %w", err)
 	}
+
+	//llm, err := openai.New(
+	//	openai.WithModel("text-embedding-3-small"),
+	//	openai.WithToken(os.Getenv("OPENAI_API_KEY")),
+	//	openai.WithHTTPClient(httpCli),
+	//)
+	//if err != nil {
+	//	return fmt.Errorf("openai.New: %w", err)
+	//}
 
 	embedder, err := embeddings.NewEmbedder(llm)
 	if err != nil {

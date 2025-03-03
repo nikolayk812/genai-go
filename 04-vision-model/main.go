@@ -27,7 +27,7 @@ func main() {
 
 func run(ctx context.Context, useOllama bool) error {
 	httpCli := &http.Client{
-		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
+		Transport: internalhttp.NewLoggingRoundTripper(),
 	}
 
 	var llm llms.Model
