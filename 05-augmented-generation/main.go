@@ -3,45 +3,35 @@ package main
 import (
 	"context"
 	"fmt"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
+	internalllms "github.com/nikolayk812/genai-go/internal/llms"
 	"log"
+	"net/http"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
 func main() {
-	if err := run(); err != nil {
+	ctx := context.Background()
+
+	if err := run(ctx); err != nil {
 		log.Fatalf("run: %s", err)
 	}
 }
 
-func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.5.4-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "chat-model",
-		},
-		Reuse: true,
-	}))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = testcontainers.TerminateContainer(c)
-		if err != nil {
-			err = fmt.Errorf("terminate container: %w", err)
-		}
-	}()
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return fmt.Errorf("connection string: %w", err)
+func run(ctx context.Context) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
 	}
 
-	llm, err := ollama.New(ollama.WithModel("llama3.2:1b"), ollama.WithServerURL(ollamaURL))
+	llm, err := ollama.New(
+		ollama.WithModel("llama3.2"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return fmt.Errorf("ollama new: %w", err)
+		return fmt.Errorf("ollama.New: %w", err)
 	}
 
 	originalMessage := `
@@ -58,9 +48,8 @@ func run() (err error) {
 		Do not indicate that you have been given any additional information.
 		`, originalMessage)
 
-	ctx := context.Background()
 	originalContent := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, originalMessage),
+		llms.TextParts(llms.ChatMessageTypeHuman, originalMessage),
 	}
 
 	originalCompletion, err := llm.GenerateContent(
@@ -69,16 +58,16 @@ func run() (err error) {
 		llms.WithTopK(1),
 	)
 	if err != nil {
-		return fmt.Errorf("llm generate original content: %w", err)
+		return fmt.Errorf("llm.GenerateContent[original]: %w", err)
 	}
 
 	fmt.Println("\nOriginal completion:")
-	for _, choice := range originalCompletion.Choices {
-		fmt.Println(choice.Content)
+	for _, choiceContent := range internalllms.ContentResponseToStrings(originalCompletion) {
+		fmt.Println(choiceContent)
 	}
 
 	augmentedContent := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, augmentedMessage),
+		llms.TextParts(llms.ChatMessageTypeHuman, augmentedMessage),
 	}
 
 	augmentedCompletion, err := llm.GenerateContent(
@@ -87,12 +76,12 @@ func run() (err error) {
 		llms.WithTopK(1),
 	)
 	if err != nil {
-		return fmt.Errorf("llm generate original content: %w", err)
+		return fmt.Errorf("llm.GenerateContent[augmented] %w", err)
 	}
 
 	fmt.Println("\nAugmented completion:")
-	for _, choice := range augmentedCompletion.Choices {
-		fmt.Println(choice.Content)
+	for _, choiceContent := range internalllms.ContentResponseToStrings(augmentedCompletion) {
+		fmt.Println(choiceContent)
 	}
 
 	return nil

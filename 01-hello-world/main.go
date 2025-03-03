@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"log"
+	"net/http"
 )
 
 // ollama run llama3.2
@@ -19,9 +21,14 @@ func main() {
 }
 
 func run(ctx context.Context) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
+	}
+
 	llm, err := ollama.New(
 		ollama.WithModel("llama3.2"),
-		ollama.WithServerURL("http://localhost:11434"))
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli))
 	if err != nil {
 		return fmt.Errorf("ollama.New: %w", err)
 	}

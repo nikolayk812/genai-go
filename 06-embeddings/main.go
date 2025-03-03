@@ -3,52 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
 	"log"
+	"net/http"
 
 	"github.com/chewxy/math32"
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
 func main() {
-	if err := run(); err != nil {
-		log.Fatalf("run: %s", err)
-	}
-}
-
-func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.5.4-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "embeddings-model",
-		},
-		Reuse: true,
-	}))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = testcontainers.TerminateContainer(c)
-		if err != nil {
-			err = fmt.Errorf("terminate container: %w", err)
-		}
-	}()
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return fmt.Errorf("connection string: %w", err)
-	}
-
-	llm, err := ollama.New(ollama.WithModel("all-minilm:22m"), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return fmt.Errorf("ollama new: %w", err)
-	}
-
-	embedder, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		return fmt.Errorf("embedder new: %w", err)
-	}
+	ctx := context.Background()
 
 	docs := []string{
 		"A cat is a small domesticated carnivorous mammal",
@@ -57,15 +22,40 @@ func run() (err error) {
 		"Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code.",
 	}
 
-	vecs, err := embedder.EmbedDocuments(context.Background(), docs)
+	if err := run(ctx, docs); err != nil {
+		log.Fatalf("run: %s", err)
+	}
+}
+
+func run(ctx context.Context, docs []string) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
+	}
+
+	llm, err := ollama.New(
+		ollama.WithModel("nomic-embed-text:v1.5"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		log.Fatal("embed query", err)
+		return fmt.Errorf("ollama.New: %w", err)
+	}
+
+	embedder, err := embeddings.NewEmbedder(llm)
+	if err != nil {
+		return fmt.Errorf("embeddings.NewEmbedder: %w", err)
+	}
+
+	vectors, err := embedder.EmbedDocuments(ctx, docs)
+	if err != nil {
+		return fmt.Errorf("embeddings.EmbedDocuments: %w", err)
 	}
 
 	fmt.Println("Similarities:")
-	for i := range docs {
-		for j := range docs {
-			fmt.Printf("%6s ~ %6s = %0.2f\n", docs[i], docs[j], cosineSimilarity(vecs[i], vecs[j]))
+	docLen := len(docs)
+	for i := 0; i < docLen; i++ {
+		for j := i; j < docLen; j++ {
+			fmt.Printf("%d ~ %d = %0.2f\n", i, j, cosineSimilarity(vectors[i], vectors[j]))
 		}
 	}
 
@@ -82,10 +72,11 @@ func cosineSimilarity(x, y []float32) float32 {
 	var dot, nx, ny float32
 
 	for i := range x {
-		nx += x[i] * x[i]
-		ny += y[i] * y[i]
-		dot += x[i] * y[i]
+		nx += x[i] * x[i]  // Sum of squares of x's elements
+		ny += y[i] * y[i]  // Sum of squares of y's elements
+		dot += x[i] * y[i] // Dot product of x and y
 	}
 
+	// return dot / float32(math.Sqrt(float64(nx)) * math.Sqrt(float64(ny)))
 	return dot / (math32.Sqrt(nx) * math32.Sqrt(ny))
 }

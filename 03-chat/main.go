@@ -4,49 +4,39 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
+	internalllms "github.com/nikolayk812/genai-go/internal/llms"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
 func main() {
-	if err := run(); err != nil {
+	ctx := context.Background()
+
+	if err := run(ctx); err != nil {
 		log.Fatalf("run: %s", err)
 	}
 }
 
-func run() (err error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/llama3.2:0.5.4-1b", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "chat-model",
-		},
-		Reuse: true,
-	}))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = testcontainers.TerminateContainer(c)
-		if err != nil {
-			err = fmt.Errorf("terminate container: %w", err)
-		}
-	}()
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return fmt.Errorf("connection string: %w", err)
+func run(ctx context.Context) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(http.DefaultTransport),
 	}
 
-	llm, err := ollama.New(ollama.WithModel("llama3.2:1b"), ollama.WithServerURL(ollamaURL))
+	llm, err := ollama.New(
+		ollama.WithModel("llama3.2"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return fmt.Errorf("ollama new: %w", err)
+		return fmt.Errorf("ollama.New: %w", err)
 	}
 
 	// listen for interrupt signals to end the chat session gracefully
@@ -62,30 +52,36 @@ func run() (err error) {
 	var conversation []llms.MessageContent
 
 	reader := bufio.NewReader(os.Stdin)
+
 	// Enter a conversation loop
 	for {
 		fmt.Print("\nYou: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			return fmt.Errorf("read string: %w", err)
+			return fmt.Errorf("reader.ReadString: %w", err)
 		}
 
 		input = strings.TrimSpace(input)
 		switch input {
-		case "quit", "exit":
+		case "quit", "exit", "bye":
 			fmt.Println("Ending chat session")
 			os.Exit(0)
 		}
 
 		conversation = append(conversation, llms.TextParts(llms.ChatMessageTypeHuman, input))
 
-		ctx := context.Background()
-		_, err = llm.GenerateContent(ctx, conversation, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		// TODO: skip earlier messages if context length is approaching the limit, or to save costs
+		// see: internalllms.TotalTokens(responses)
+
+		responses, err := llm.GenerateContent(ctx, conversation, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Print(string(chunk))
 			return nil
 		}))
 		if err != nil {
-			return fmt.Errorf("llm generate content: %w", err)
+			return fmt.Errorf("llm.GenerateContent: %w", err)
 		}
+
+		choiceContents := internalllms.ContentResponseToStrings(responses)
+		conversation = append(conversation, llms.TextParts(llms.ChatMessageTypeAI, choiceContents...))
 	}
 }
