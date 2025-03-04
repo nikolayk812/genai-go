@@ -48,10 +48,10 @@ func run(ctx context.Context) error {
 	}
 
 	optionsVector := []vectorstores.Option{
-		vectorstores.WithScoreThreshold(0.80), // use for precision, when you want to get only the most relevant documents
+		vectorstores.WithScoreThreshold(0.70), // use for precision, when you want to get only the most relevant documents
 		//vectorstores.WithNameSpace(""),            // use for set a namespace in the storage
 		//vectorstores.WithFilters(map[string]interface{}{"language": "en"}), // use for filter the documents
-		vectorstores.WithEmbedder(embedder), // use when you want add documents or doing similarity search
+		// vectorstores.WithEmbedder(embedder), // use when you want add documents or doing similarity search
 		//vectorstores.WithDeduplicater(vectorstores.NewSimpleDeduplicater()), //  This is useful to prevent wasting time on creating an embedding
 	}
 
@@ -127,6 +127,27 @@ func buildEmbeddingModel(httpCli *http.Client) (embeddings.EmbedderClient, error
 }
 
 func buildEmbeddingStore(embedder embeddings.Embedder) (vectorstores.VectorStore, error) {
+
+	//docker run -d --name chroma \
+	//-p 8000:8000 \
+	//--rm \
+	//chromadb/chroma:0.5.2
+
+	//return chroma.New(
+	//	chroma.WithEmbedder(embedder),
+	//	chroma.WithChromaURL("http://localhost:8000"),
+	//	chroma.WithNameSpace("Testcontainers"),
+	//	chroma.WithDistanceFunction(types.COSINE),
+	//)
+
+	//docker run -d --name weaviate \
+	//-e QUERY_DEFAULTS=vector \
+	//-e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
+	//-e WEAVIATE_DEFAULT_CONTEXTIONARY_LANG=en \
+	//-p 8080:8080 \
+	//--rm \
+	//semitechnologies/weaviate:1.25.33
+
 	return weaviate.New(
 		weaviate.WithScheme("http"),
 		weaviate.WithHost("localhost:8080"),
