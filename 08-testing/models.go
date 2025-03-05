@@ -1,57 +1,35 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms"
+	"net/http"
 
-	"github.com/testcontainers/testcontainers-go"
-	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
-func buildChatModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/"+model+":0.5.4-"+tag, testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "chat-model",
-		},
-		Reuse: true,
-	}))
+func buildChatModel(httpCli *http.Client) (llms.Model, error) {
+	llm, err := ollama.New(
+		ollama.WithModel("llama3.2"),
+		ollama.WithServerURL("http://localhost:11434"),
+		ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return nil, err
-	}
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("connection string: %w", err)
-	}
-
-	llm, err := ollama.New(ollama.WithModel(modelName), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return nil, fmt.Errorf("ollama new: %w", err)
+		return nil, fmt.Errorf("ollama.New: %w", err)
 	}
 
 	return llm, nil
 }
 
-func buildEmbeddingModel() (*ollama.LLM, error) {
-	c, err := tcollama.Run(context.Background(), "mdelapenya/all-minilm:0.5.4-22m", testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
-		ContainerRequest: testcontainers.ContainerRequest{
-			Name: "embeddings-model",
-		},
-		Reuse: true,
-	}))
+func buildEmbeddingModel() (embeddings.EmbedderClient, error) {
+	llm, err := ollama.New(
+		ollama.WithModel("nomic-embed-text:v1.5"),
+		ollama.WithServerURL("http://localhost:11434"),
+		//ollama.WithHTTPClient(httpCli),
+	)
 	if err != nil {
-		return nil, err
-	}
-
-	ollamaURL, err := c.ConnectionString(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("connection string: %w", err)
-	}
-
-	llm, err := ollama.New(ollama.WithModel("all-minilm:22m"), ollama.WithServerURL(ollamaURL))
-	if err != nil {
-		return nil, fmt.Errorf("ollama new: %w", err)
+		return nil, fmt.Errorf("ollama.New: %w", err)
 	}
 
 	return llm, nil

@@ -9,7 +9,7 @@ import (
 )
 
 type Chatter interface {
-	Chat(userMessage string) (string, error)
+	Chat(ctx context.Context, userMessage string) (string, error)
 }
 
 // ragContext is the context for the RAG in the form of a list of relevant documents
@@ -67,33 +67,39 @@ Follow these instructions:
 // Chat creates a chat response from the user message.
 // If there is a RAG context in the form of relevant documents, it will be added to the prompt
 // as system messages.
-func (s *ChatService) Chat(userMessage string) (string, error) {
-	ctx := context.Background()
+func (s *ChatService) Chat(ctx context.Context, userMessage string) (string, error) {
+	// Ollama ignores system, use human instead
+	systemType := llms.ChatMessageTypeHuman
+
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, s.systemMessage),
+		llms.TextParts(systemType, s.systemMessage),
 	}
 
 	if s.ragCtx != nil {
 		for _, doc := range s.ragCtx.relevantDocs {
-			content = append(content, llms.TextParts(llms.ChatMessageTypeSystem, doc.PageContent))
+			content = append(content, llms.TextParts(systemType, doc.PageContent))
 		}
 	}
 
 	content = append(content, llms.TextParts(llms.ChatMessageTypeHuman, userMessage))
 
-	completion, err := s.chatModel.GenerateContent(
-		ctx, content,
+	completion, err := s.chatModel.GenerateContent(ctx, content,
 		llms.WithTemperature(0.00),
 		llms.WithTopK(1),
 		llms.WithSeed(42),
 	)
 	if err != nil {
-		return "", fmt.Errorf("llm generate content: %w", err)
+		return "", fmt.Errorf("chatModel.GenerateContent: %w", err)
+	}
+	if completion == nil {
+		return "", nil
 	}
 
 	response := ""
 	for _, choice := range completion.Choices {
-		response += choice.Content
+		if choice != nil {
+			response += choice.Content
+		}
 	}
 
 	return response, nil

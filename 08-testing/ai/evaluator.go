@@ -72,7 +72,8 @@ type EvaluatorAgent struct {
 func (v *EvaluatorAgent) Evaluate(question string, answer string, reference string) (string, error) {
 	ctx := context.Background()
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeSystem, v.systemMessage),
+		// llms.TextParts(llms.ChatMessageTypeSystem, v.systemMessage),
+		llms.TextParts(llms.ChatMessageTypeHuman, v.systemMessage),
 		llms.TextParts(llms.ChatMessageTypeHuman, fmt.Sprintf(v.userMessage, question, answer, reference)),
 	}
 

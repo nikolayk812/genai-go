@@ -3,16 +3,22 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/nikolayk812/genai-go/08-testing/ai"
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/chewxy/math32"
-	"github.com/mdelapenya/genai-testcontainers-go/testing/ai"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
+var httpCli = &http.Client{
+	Transport: internalhttp.NewLoggingRoundTripper(),
+}
+
 func Test1_oldSchool(t *testing.T) {
-	chatModel, err := buildChatModel()
+	chatModel, err := buildChatModel(httpCli)
 	if err != nil {
 		t.Fatalf("build chat model: %s", err)
 	}
@@ -29,7 +35,7 @@ func Test1_oldSchool(t *testing.T) {
 		t.Setenv("VECTOR_STORE", "pgvector")
 
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight chat: %s", err)
 			}
@@ -38,7 +44,7 @@ func Test1_oldSchool(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight chat: %s", err)
 			}
@@ -49,7 +55,7 @@ func Test1_oldSchool(t *testing.T) {
 
 	t.Run("weaviate", func(t *testing.T) {
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight chat: %s", err)
 			}
@@ -58,7 +64,7 @@ func Test1_oldSchool(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight chat: %s", err)
 			}
@@ -69,7 +75,7 @@ func Test1_oldSchool(t *testing.T) {
 }
 
 func Test2_embeddings(t *testing.T) {
-	chatModel, err := buildChatModel()
+	chatModel, err := buildChatModel(httpCli)
 	if err != nil {
 		t.Fatalf("build chat model: %s", err)
 	}
@@ -110,7 +116,7 @@ func Test2_embeddings(t *testing.T) {
 		t.Setenv("VECTOR_STORE", "pgvector")
 
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight answer: %s", err)
 			}
@@ -119,7 +125,7 @@ func Test2_embeddings(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("ragged answer: %s", err)
 			}
@@ -130,7 +136,7 @@ func Test2_embeddings(t *testing.T) {
 
 	t.Run("weaviate", func(t *testing.T) {
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight answer: %s", err)
 			}
@@ -139,7 +145,7 @@ func Test2_embeddings(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("ragged answer: %s", err)
 			}
@@ -171,11 +177,12 @@ func cosineSimilarity(t *testing.T, x, y []float32) float32 {
 
 func Test3_evaluatorAgent(t *testing.T) {
 	reference := `
+There 2 things which answer must contain:
 - Answer must indicate that you can enable verbose logging in Testcontainers Desktop by setting the property cloud.logs.verbose to true in the ~/.testcontainers.properties file
 - Answer must indicate that you can enable verbose logging in Testcontainers Desktop by adding the --verbose flag when running the cli
 `
 
-	chatModel, err := buildChatModel()
+	chatModel, err := buildChatModel(httpCli)
 	if err != nil {
 		t.Fatalf("build chat model: %s", err)
 	}
@@ -210,7 +217,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 		t.Setenv("VECTOR_STORE", "pgvector")
 
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight answer: %s", err)
 			}
@@ -219,7 +226,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("ragged answer: %s", err)
 			}
@@ -230,7 +237,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 
 	t.Run("weaviate", func(t *testing.T) {
 		t.Run("straight-answer", func(tt *testing.T) {
-			answer, err := straightAnswer(chatModel)
+			answer, err := straightAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("straight answer: %s", err)
 			}
@@ -239,7 +246,7 @@ func Test3_evaluatorAgent(t *testing.T) {
 		})
 
 		t.Run("ragged-answer", func(tt *testing.T) {
-			answer, err := raggedAnswer(chatModel)
+			answer, err := raggedAnswer(t.Context(), chatModel)
 			if err != nil {
 				tt.Fatalf("ragged answer: %s", err)
 			}

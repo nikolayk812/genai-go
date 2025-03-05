@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
+	"github.com/nikolayk812/genai-go/08-testing/ai"
 	"log"
+	"net/http"
 
-	"github.com/mdelapenya/genai-testcontainers-go/testing/ai"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/vectorstores"
+
+	internalhttp "github.com/nikolayk812/genai-go/internal/http"
 )
 
 const (
@@ -20,29 +21,33 @@ const (
 	modelName string = model + ":" + tag
 )
 
-//go:embed knowledge
-var knowledge embed.FS
-
 func main() {
+	ctx := context.Background()
+
 	log.Println(question)
-	if err := run(); err != nil {
+
+	if err := run(ctx); err != nil {
 		log.Fatalf("run: %s", err)
 	}
 }
 
-func run() error {
-	chatModel, err := buildChatModel()
-	if err != nil {
-		return fmt.Errorf("build chat model: %s", err)
+func run(ctx context.Context) error {
+	httpCli := &http.Client{
+		Transport: internalhttp.NewLoggingRoundTripper(),
 	}
 
-	resp, err := straightAnswer(chatModel)
+	chatModel, err := buildChatModel(httpCli)
+	if err != nil {
+		return fmt.Errorf("buildChatModel: %w", err)
+	}
+
+	resp, err := straightAnswer(ctx, chatModel)
 	if err != nil {
 		log.Fatalf("straight chat: %s", err)
 	}
 	fmt.Println(">> Straight answer:\n", resp)
 
-	resp, err = raggedAnswer(chatModel)
+	resp, err = raggedAnswer(ctx, chatModel)
 	if err != nil {
 		return fmt.Errorf("ragged chat: %s", err)
 	}
@@ -51,40 +56,40 @@ func run() error {
 	return nil
 }
 
-func straightAnswer(chatModel *ollama.LLM) (string, error) {
+func straightAnswer(ctx context.Context, chatModel llms.Model) (string, error) {
 	chatter := ai.NewChat(chatModel)
 
-	return chatter.Chat(question)
+	return chatter.Chat(ctx, question)
 }
 
-func raggedAnswer(chatModel *ollama.LLM) (string, error) {
-	chatter, err := buildRaggedChat(chatModel)
+func raggedAnswer(ctx context.Context, chatModel llms.Model) (string, error) {
+	chatter, err := buildRaggedChat(ctx, chatModel)
 	if err != nil {
 		return "", fmt.Errorf("build ragged chat: %s", err)
 	}
 
-	return chatter.Chat(question)
+	return chatter.Chat(ctx, question)
 }
 
-func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
+func buildRaggedChat(ctx context.Context, chatModel llms.Model) (ai.Chatter, error) {
 	embeddingModel, err := buildEmbeddingModel()
 	if err != nil {
-		return nil, fmt.Errorf("build embedding model: %w", err)
+		return nil, fmt.Errorf("buildEmbeddingModel: %w", err)
 	}
 
 	embedder, err := embeddings.NewEmbedder(embeddingModel)
 	if err != nil {
-		return nil, fmt.Errorf("new embedder: %w", err)
+		return nil, fmt.Errorf("embeddings.NewEmbedder: %w", err)
 	}
 
-	store, err := selectStore(context.Background(), embedder)
+	store, err := selectStore(ctx, embedder)
 	if err != nil {
-		return nil, fmt.Errorf("new store: %w", err)
+		return nil, fmt.Errorf("selectStore: %w", err)
 	}
 
-	if err := ingestion(store); err != nil {
-		return nil, fmt.Errorf("ingestion: %w", err)
-	}
+	//if err := ingestion(ctx, store); err != nil {
+	//	return nil, fmt.Errorf("ingestion: %w", err)
+	//}
 
 	// Enrich the response with the relevant documents after the ingestion
 	optionsVector := []vectorstores.Option{
@@ -97,7 +102,7 @@ func buildRaggedChat(chatModel llms.Model) (ai.Chatter, error) {
 
 	maxResults := 3 // Number of relevant documents to return
 
-	relevantDocs, err := store.SimilaritySearch(context.Background(), "cloud.logs.verbose", maxResults, optionsVector...)
+	relevantDocs, err := store.SimilaritySearch(ctx, "cloud.logs.verbose", maxResults, optionsVector...)
 	if err != nil {
 		return nil, fmt.Errorf("similarity search: %w", err)
 	}
